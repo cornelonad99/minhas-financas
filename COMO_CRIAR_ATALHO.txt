@@ -1,0 +1,20 @@
+MINHAS FINANÇAS — ATALHO DE DESPESA (iOS)
+
+1. Atualize os arquivos no GitHub Pages e confirme a nova versão.
+2. No iPhone, abra o aplicativo Atalhos > + > Novo Atalho. Nome: Nova despesa.
+3. Adicione a ação "Pedir Entrada" (Número), pergunta "Valor da despesa?".
+4. Adicione a ação "Escolher do Menu" para escolher a conta (por exemplo: Continental, UENO BANK, BNF, NUBANK).
+   Salve o texto escolhido na variável "Conta" usando a ação Definir Variável em cada opção.
+5. Adicione outra ação "Escolher do Menu" para a categoria (Alimentação, Transporte, Moradia, etc.).
+   Salve a opção na variável "Categoria".
+6. Adicione "Pedir Entrada" (Texto), pergunta "Descrição (opcional)?"; salve em "Descricao".
+7. Adicione a ação "URL" com o endereço abaixo, inserindo as variáveis mágicas em cada posição:
+   https://cornelonad99.github.io/minhas-financas/?atalho=despesa&valor=[Valor]&conta=[Conta]&categoria=[Categoria]&descricao=[Descricao]
+   IMPORTANTE: use a ação "Codificar URL" para cada variável de texto antes de montar o endereço.
+8. Adicione a ação "Abrir URLs" e selecione a URL criada.
+9. Abra Centro de Controle, toque em + > Adicionar um Controle > Atalho e escolha "Nova despesa".
+10. Teste com uma despesa pequena e CONFIRME o registro no formulário do aplicativo.
+
+ATENÇÃO: No iOS, links podem abrir no Safari em vez do PWA instalado. Os armazenamentos do Safari e do PWA podem ser separados. Se o formulário mostrar contas diferentes, NÃO confirme. A solução local não permite gravação direta e confiável do Atalhos no PWA; seria necessária uma integração diferente (ex.: backend com autenticação) para automação total.
+
+Evite incluir informações financeiras sensíveis na URL. Os parâmetros são removidos do histórico após o carregamento, mas podem aparecer temporariamente no navegador/servidor.
