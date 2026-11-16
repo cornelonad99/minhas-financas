@@ -1,29 +1,338 @@
-<!doctype html><html lang="es-PY"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#111827"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon-192.png"><title>Mis Finanzas</title><style>
-:root{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#172033;background:#f5f7fb}*{box-sizing:border-box}body{margin:0}main{max-width:700px;margin:auto;padding:24px 18px 110px}header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}h1{font-size:25px;letter-spacing:-.8px;margin:0}h2{font-size:17px;margin:0 0 15px}small,.muted{color:#738095}.pill{background:#e8eef7;border-radius:30px;padding:8px 12px;font-size:12px}.card{background:white;border:1px solid #e9edf3;border-radius:22px;padding:20px;margin:14px 0;box-shadow:0 5px 24px #1a2c4b07}.hero{background:#182338;color:white}.hero .muted{color:#b9c5d6}.hero h2{font-size:31px;margin:8px 0 0}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.grid .card{margin:0}.stat{font-size:20px;font-weight:750;margin:8px 0}.green{color:#0c9673}.red{color:#d34c5b}.row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid #edf0f5}.row:last-child{border:0}.row strong{display:block}.row .muted{font-size:12px;margin-top:4px}.right{text-align:right}.btn{background:#1d2d4a;color:white;border:0;border-radius:14px;padding:12px 16px;font-size:14px;font-weight:650;cursor:pointer}.btn.secondary{background:#eef2f8;color:#253550}.btn.danger{background:#fff0f1;color:#b73547}button{cursor:pointer}nav{position:fixed;bottom:0;left:0;right:0;background:#ffffffed;border-top:1px solid #e8ebf1;display:flex;justify-content:center;padding:8px 10px max(12px,env(safe-area-inset-bottom));z-index:2}nav button{background:transparent;border:0;color:#7c8799;font-size:12px;padding:9px 17px;border-radius:12px}nav button.active{background:#edf2f9;color:#1a2d4d;font-weight:700}label{display:block;font-size:13px;font-weight:650;margin:14px 0 7px}input,select{width:100%;padding:13px;border:1px solid #dce3ed;border-radius:12px;background:white;color:#172033;font-size:16px}input[type=file]{font-size:12px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}.hidden{display:none!important}.tab{display:none}.tab.active{display:block}.topline{display:flex;align-items:center;justify-content:space-between;gap:12px}.badge{background:#eef2f8;border-radius:8px;padding:5px 8px;font-size:12px}.bar{height:9px;border-radius:20px;background:#edf1f6;overflow:hidden;margin-top:7px}.fill{height:100%;background:#2d8c83}.empty{color:#8a95a5;text-align:center;padding:24px 0}.inline{display:flex;gap:10px;align-items:center}.inline>*{flex:1}.note{font-size:12px;line-height:1.5;color:#77849a}#toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#182338;color:white;padding:12px 18px;border-radius:12px;display:none;z-index:5;white-space:nowrap}dialog{border:0;border-radius:22px;width:min(92vw,500px);padding:22px;box-shadow:0 15px 70px #18233840}dialog::backdrop{background:#0b142077}dialog h2{margin-bottom:12px}@media(prefers-color-scheme:dark){:root{background:#101720;color:#eef2f8}.card,dialog{background:#1b2532;border-color:#2a3646;color:#edf2f9}.hero{background:#253752}nav{background:#1b2532ed;border-color:#2a3646}nav button.active,.pill,.badge{background:#344258;color:#eaf1fc}.row{border-color:#303b4b}input,select{background:#17212e;color:#eef2f8;border-color:#364253}.btn.secondary{background:#344258;color:white}.bar{background:#344258}}
+<!doctype html><html lang="es-PY"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#ffffff"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon-192.png"><title>Mis Finanzas</title><style>
+:root {
+  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color-scheme: light;
+  --page: #e9ebf6;
+  --surface: #fff;
+  --ink: #211c2c;
+  --muted: #635d71;
+  --line: #e8e5ef;
+  --soft: #f1edf9;
+  --accent: #5b13d0;
+  --accent-end: #6a1be8;
+  --income: #237a43;
+  --income-soft: #dff4e6;
+  --expense: #b92344;
+  --expense-soft: #fce7ed;
+  --shadow: 0 3px 10px rgba(45, 25, 92, .08);
+  --nav-height: 66px;
+  background: var(--page);
+  color: var(--ink);
+}
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #120f1d;
+  --surface: #191427;
+  --ink: #f6f2ff;
+  --muted: #beb4ce;
+  --line: #372c49;
+  --soft: #2e2145;
+  --accent: #c1a0ff;
+  --income: #7bda9d;
+  --income-soft: #213b2c;
+  --expense: #ff9ab1;
+  --expense-soft: #452536;
+  --shadow: 0 3px 11px rgba(0, 0, 0, .19);
+}
+* { box-sizing: border-box }
+body { margin: 0; min-width: 0 }
+main { max-width: 620px; margin: auto; padding-bottom: calc(var(--nav-height) + env(safe-area-inset-bottom) + 12px) }
+button, input, select { font: inherit }
+button { cursor: pointer }
+button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px }
+h1, h2, p { margin: 0 }
+h1 { font-size: 16px; line-height: 1.35 }
+h2 { font-size: 15px; line-height: 1.35 }
+svg { width: 20px; height: 20px; flex: 0 0 auto }
+.hidden, .tab { display: none !important }
+.tab.active { display: block !important }
+.screen-body { padding: 15px 15px 8px }
+.screen-body > section + section { margin-top: 16px }
+.card {
+  background: var(--surface);
+  border: 1px solid color-mix(in srgb, var(--line), transparent 45%);
+  border-radius: 19px;
+  box-shadow: var(--shadow);
+  padding: 15px;
+}
+.card + .card { margin-top: 12px }
+.section-line, .topline, .row { display: flex; align-items: center; justify-content: space-between; gap: 10px }
+.section-line { margin: 0 2px 8px; min-height: 22px }
+.section-line h2 { color: var(--muted); font-weight: 620; font-size: 13px; letter-spacing: .01em }
+.card .topline { margin-bottom: 10px }
+.btn {
+  border: 1px solid transparent;
+  border-radius: 100px;
+  background: linear-gradient(110deg,#4d09bb,#6a1be8);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 650;
+  padding: 10px 15px;
+  min-height: 40px;
+}
+.btn.secondary { color: var(--accent); background: var(--soft); border-color: var(--line) }
+.btn.danger { color: var(--expense); background: var(--expense-soft) }
+.btn.compact { min-height: 34px; padding: 6px 11px; font-size: 12px }
+.link-button { border: 0; background: transparent; color: var(--accent); font-size: 12px; padding: 5px 0; font-weight: 650; white-space: nowrap }
+.muted, .note, .empty { color: var(--muted); font-size: 12px; line-height: 1.5 }
+.note { margin: 8px 0 }
+.right { text-align: right; flex: none }
+.green { color: var(--income) }
+.red { color: var(--expense) }
+.empty { text-align: center; padding: 13px 8px; display: grid; justify-items: center; gap: 7px }
+.empty-icon { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 11px; background: var(--soft); color: var(--accent); font-size: 20px }
+.overview, .screen-header {
+  background: var(--surface);
+  border-radius: 0 0 23px 23px;
+  box-shadow: var(--shadow);
+}
+.overview { padding: calc(12px + env(safe-area-inset-top)) 16px 19px }
+.overview-header { display: grid; grid-template-columns: 60px 1fr 60px; align-items: center; gap: 4px; text-align: center }
+.app-mark { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 12px; background: var(--soft); color: var(--accent) }
+.app-name { font-weight: 720; font-size: 15px }
+.period { display: flex; align-items: center; justify-content: space-between; gap: 5px }
+.period button, .back {
+  color: inherit;
+  border: 0;
+  background: transparent;
+  font-size: 23px;
+  line-height: 1;
+  min-width: 36px;
+  min-height: 35px;
+  border-radius: 12px;
+}
+.period .month-label { font-size: 13px; font-weight: 650; line-height: 1.3; text-transform: capitalize; padding: 0 3px }
+.overview-header .period { justify-content: center; gap: 0 }
+.overview-header .period button:not(.month-label) { color: var(--muted) }
+#month.month-picker { position: fixed; top: calc(env(safe-area-inset-top) + 54px); left: 50%; transform: translateX(-50%); opacity: 0; pointer-events: none; width: 150px; z-index: 3 }
+#month.month-picker.visible { opacity: 1; pointer-events: auto }
+#overviewCurrency { padding: 5px 4px; min-height: 33px; width: auto; color: var(--accent); font-size: 11px; font-weight: 700; background: var(--soft); border: 0; border-radius: 10px; justify-self: end }
+.overview-balance { text-align: center; padding: 19px 0 16px }
+.overview-balance p { font-size: 12px; color: var(--muted); margin-bottom: 4px }
+.overview-balance strong { font-size: clamp(27px,8vw,37px); letter-spacing: -.045em; font-weight: 720; overflow-wrap: anywhere }
+.overview-flow { display: grid; grid-template-columns: 1fr 1fr; text-align: left }
+.overview-flow > div { display: flex; align-items: center; justify-content: center; gap: 8px; min-width: 0 }
+.overview-flow > div + div { border-left: 1px solid var(--line); padding-left: 5px }
+.overview-flow > div div { min-width: 0 }
+.overview-flow div > div > span, .transaction-summary span { display: block; font-size: 11px; color: var(--muted) }
+.overview-flow strong, .transaction-summary strong { display: block; font-size: 14px; font-weight: 680; overflow-wrap: anywhere }
+.type-icon { width: 33px; height: 33px; display: grid; place-items: center; border-radius: 50%; flex: 0 0 auto; font-weight: 700; font-size: 18px; color: var(--accent); background: var(--soft) }
+.type-icon.income { color: var(--income); background: var(--income-soft) }
+.type-icon.expense { color: var(--expense); background: var(--expense-soft) }
+.overview-flow .type-icon { color: #fff }
+.overview-flow .type-icon.income { background: #278348 }
+.overview-flow .type-icon.expense { background: #be2947 }
+.account-panel { padding: 4px 13px }
+.bank-identity { display: flex; align-items: center; gap: 9px; min-width: 0 }
+.bank-identity > div { min-width: 0; overflow-wrap: anywhere }
+.bank-icon, .bank-fallback { width: 38px; height: 38px; object-fit: contain; border-radius: 9px; background: #fff; flex: 0 0 auto }
+.bank-fallback { display: grid; place-items: center; background: var(--soft); color: var(--accent) }
+.account-row { min-height: 61px }
+.row + .row { border-top: 1px solid var(--line) }
+.account-name, .account-balance { font-size: 13px; font-weight: 400 }
+.account-balance { color: var(--income); margin-top: 2px }
+.account-add { display: block; width: min(100%, 260px); margin: 8px auto 12px }
+.account-total { display: flex; justify-content: space-between; gap: 8px; border-top: 1px solid var(--line); font-size: 13px; padding: 12px 1px 9px }
+.account-actions .btn { margin-right: 4px; margin-bottom: 4px }
+.transaction-row { padding: 9px 0; justify-content: flex-start; font-size: 13px }
+.transaction-text { flex: 1; min-width: 0; overflow-wrap: anywhere }
+.transaction-text strong { font-weight: 620 }
+.transaction-row .link-button { display: block; margin-left: auto; padding-bottom: 0 }
+.breakdown-row { padding: 8px 0; font-size: 13px }
+.breakdown-row .topline { margin-bottom: 5px }
+.bar, .weekly-track { background: var(--soft); height: 7px; border-radius: 100px; overflow: hidden }
+.fill, .weekly-fill { background: linear-gradient(90deg,#5b13d0,#a175fc); height: 100%; border-radius: inherit }
+.weekly-fill.over { background: #c92b50 }
+.purple-header {
+  padding: calc(12px + env(safe-area-inset-top)) 16px 23px;
+  background: linear-gradient(125deg,#4c08bb,#6512e1 70%,#5d09d5);
+  color: #fff;
+}
+.purple-topline { display: grid; grid-template-columns: 36px 1fr 36px; align-items: center; text-align: center }
+.purple-topline h1 { grid-column: 2 }
+.options-button { width: 34px; height: 34px; border: 0; border-radius: 50%; background: rgba(255,255,255,.22); color: white; font-size: 12px; letter-spacing: .06em }
+.purple-header .period { margin: 6px 0 0 }
+.transaction-panel { position: relative; margin-top: -16px; min-height: min(62vh,560px); background: var(--surface); border-radius: 20px; padding: 0 15px 17px; box-shadow: var(--shadow) }
+.transaction-summary { display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid var(--line); padding: 13px 0; line-height: 1.45 }
+.transaction-summary > div { min-width: 0; padding: 0 12px }
+.transaction-summary > div + div { border-left: 1px solid var(--line) }
+.filters { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0 4px }
+.filters select { font-size: 12px }
+.transaction-options { padding: 12px 0 5px; border-bottom: 1px solid var(--line) }
+.checkbox-line { display: flex; align-items: center; gap: 8px; margin: 4px 0 12px }
+.checkbox-line input { width: auto; accent-color: var(--accent); min-height: 0 }
+.transactions-empty { min-height: 225px; align-content: center; gap: 6px }
+.transactions-empty .empty-icon { width: 64px; height: 64px; border-radius: 21px; font-size: 31px; margin-bottom: 8px; transform: rotate(-7deg) }
+.transactions-empty strong { color: var(--ink); font-size: 14px }
+.screen-header { display: flex; justify-content: center; align-items: center; position: relative; height: calc(62px + env(safe-area-inset-top)); padding-top: env(safe-area-inset-top) }
+.back { position: absolute; left: 13px; color: var(--accent) }
+.menu-list { padding: 0 12px }
+.menu-list button {
+  display: flex; align-items: center; gap: 10px; text-align: left; width: 100%; padding: 13px 4px; color: var(--ink); background: transparent; border: 0; font-size: 14px;
+}
+.menu-list button + button { border-top: 1px solid var(--line) }
+.menu-list button svg, .menu-list button span:last-child { color: var(--accent) }
+.menu-list button span:last-child { margin-left: auto; font-size: 20px }
+.theme-choice, .inline, .actions { display: flex; gap: 8px; margin-top: 10px }
+.actions { flex-wrap: wrap }
+.theme-choice {
+  background: var(--soft); padding: 4px; border-radius: 100px;
+}
+.theme-choice button { flex: 1; min-width: 0; padding: 8px 4px; color: var(--muted); font-size: 12px; border: 0; border-radius: 100px; background: transparent }
+.theme-choice button.selected { color: var(--accent); background: var(--surface); box-shadow: var(--shadow); font-weight: 700 }
+.theme-status { margin-bottom: 0 }
+#categories { margin: 6px 0 16px }
+#categories .row { font-size: 13px; padding: 6px 0 }
+.badge { border-radius: 8px; padding: 3px 5px; color: var(--muted); font-size: 10px; background: var(--soft) }
+nav {
+  display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); align-items: start;
+  position: fixed; z-index: 4; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: min(100%,620px); min-height: var(--nav-height); padding: 6px 5px calc(5px + env(safe-area-inset-bottom));
+  background: var(--surface); box-shadow: 0 -3px 14px rgba(35,16,69,.08); border-top: 1px solid var(--line);
+}
+nav [data-tab] {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; width: 100%;
+  border: 0; border-radius: 14px; background: transparent; color: var(--muted);
+  min-height: 49px; padding: 4px 0; font-size: clamp(9px,2.55vw,11px); line-height: 1.1;
+}
+nav [data-tab].active { background: var(--soft); color: var(--accent); font-weight: 720 }
+.quick-button, .quick-close {
+  width: 49px; height: 49px; justify-self: center; border: 0; border-radius: 50%;
+  background: linear-gradient(125deg,#4a07b8,#711ef0); color: #fff;
+  font-size: 31px; line-height: 1; box-shadow: 0 4px 12px #5510ca60; display: grid; place-items: center; padding: 0;
+}
+.quick-button { margin-top: -13px; border: 2px solid var(--surface) }
+#quickMenu { bottom: calc(13px + env(safe-area-inset-bottom)); inset-inline: 0; top: auto; margin: 0 auto; padding: 6px; width: min(100%,350px); border: 0; background: transparent; box-shadow: none; overflow: visible }
+#quickMenu::backdrop { background: rgba(15,9,24,.76) }
+.quick-actions { display: grid; grid-template-columns: repeat(3,1fr); align-items: end; min-height: 100px; padding: 0 9px 12px }
+.quick-actions button { display: grid; justify-items: center; gap: 7px; padding: 0; color: #fff; background: transparent; font-size: 12px; border: 0 }
+.quick-actions button span { display: grid; place-items: center; width: 47px; height: 47px; border-radius: 50%; font-size: 23px; background: var(--surface); color: var(--accent) }
+.quick-actions .quick-income { align-self: start }
+.quick-actions .quick-income span { color: var(--income) }
+.quick-actions .quick-expense span { color: var(--expense) }
+.quick-close { margin: auto }
+label { display: block; font-size: 12px; font-weight: 650; margin: 10px 0 5px; color: var(--muted) }
+input:not([type=checkbox]), select { width: 100%; min-width: 0; min-height: 38px; border: 1px solid var(--line); border-radius: 10px; padding: 8px; color: var(--ink); background: var(--surface); font-size: 16px }
+.inline input, .inline select { flex: 1 }
+dialog {
+  border: 1px solid var(--line); border-radius: 23px;
+  width: min(calc(100% - 18px),460px); max-height: calc(100dvh - env(safe-area-inset-top) - 20px);
+  color: var(--ink); background: var(--surface); padding: 16px; box-shadow: var(--shadow);
+}
+dialog::backdrop { background: rgba(18,10,29,.58) }
+#modal { padding: 0 }
+.dialog-header { background: #5b13d0; color: white; padding: 17px 16px }
+#modal[data-kind="income"] .dialog-header { background: #267d46 }
+#modal[data-kind="expense"] .dialog-header { background: #b52344 }
+#modal[data-kind="expense"] .actions .btn[type="submit"] { background: #b52344 }
+#modal[data-kind="income"] .actions .btn[type="submit"] { background: #267d46 }
+#form { padding: 3px 15px 16px }
+.bank-preview { display: flex; align-items: center; gap: 8px; font-size: 13px; margin-top: 10px }
+.weekly-budget { border: 1px solid var(--line); border-radius: 14px; padding: 12px; margin-top: 10px }
+.weekly-header, .weekly-expense { display: flex; align-items: start; justify-content: space-between; gap: 7px }
+.weekly-status { color: var(--muted); font-size: 11px; line-height: 1.55 }
+.weekly-remaining { font-size: 25px; font-weight: 700; margin: 8px 0 2px }
+.weekly-track { margin: 8px 0 }
+.weekly-actions { display: flex; flex-wrap: wrap; gap: 5px }
+.weekly-actions .btn, .weekly-expense .btn { font-size: 11px; min-height: 32px; padding: 5px 9px }
+.weekly-expense { font-size: 13px; padding-top: 8px; margin-top: 8px; border-top: 1px solid var(--line) }
+.weekly-expense .btn { display: block; margin: 3px 0 0 auto }
+#toast { display: none; position: fixed; z-index: 6; bottom: calc(var(--nav-height) + env(safe-area-inset-bottom) + 13px); left: 50%; transform: translateX(-50%); width: max-content; max-width: calc(100% - 24px); padding: 10px 14px; border-radius: 100px; background: var(--ink); color: var(--surface); font-size: 13px }
+</style></head><body>
 
-/* Mis Finanzas 2.0 — tema claro/escuro selecionável */
-:root{--bg:#f5f8fa;--surface:#fff;--ink:#142231;--muted:#728294;--line:#e8eef1;--soft:#eef8f4;--accent:#009d73;--shadow:0 7px 26px rgba(17,49,47,.055);color-scheme:light}
-html[data-theme="dark"]{--bg:#09151b;--surface:#14232b;--ink:#f0f7f8;--muted:#a0b0ba;--line:#293c45;--soft:#183b36;--accent:#16c795;--shadow:0 7px 26px rgba(0,0,0,.12);color-scheme:dark}
-html{background:var(--bg);color:var(--ink)}body{background:var(--bg);color:var(--ink);min-height:100vh}main{padding-top:max(22px,env(safe-area-inset-top));max-width:660px}header{margin-bottom:25px}header small{font-size:10px;font-weight:800;letter-spacing:1.6px;color:var(--accent)}h1{font-size:27px;letter-spacing:-1.1px}h2{font-weight:750;letter-spacing:-.4px}.muted,small,.note{color:var(--muted)}.pill{background:var(--soft);color:var(--accent);font-weight:700}.card{background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow)}.hero{background:linear-gradient(125deg,#00865e,#00b27d);border:0;color:white;box-shadow:0 12px 24px rgba(0,146,105,.16)}.hero .muted,.hero small{color:#dcfff3}.hero h2{font-size:clamp(24px,6vw,32px);letter-spacing:-.7px}.hero .grid{border-top:1px solid #ffffff40;padding-top:16px}.btn{background:var(--accent);color:#fff;border-radius:13px}.btn.secondary{background:var(--soft);color:var(--accent)}.btn.danger{background:#ffebed;color:#bd4053}.row{border-color:var(--line)}.row .muted{color:var(--muted)}.badge{background:var(--soft);color:var(--accent)}.bar{background:var(--line)}.fill{background:var(--accent)}.empty{color:var(--muted)}input,select{background:var(--surface);border:1px solid var(--line);color:var(--ink)}nav{background:var(--surface);border-color:var(--line);box-shadow:0 -4px 24px rgba(0,0,0,.035);gap:3px}nav button{color:var(--muted);padding:10px 11px;min-width:61px}nav button.active{background:var(--soft);color:var(--accent)}dialog{background:var(--surface);color:var(--ink);border:1px solid var(--line)}#toast{background:var(--ink);color:var(--surface)}.theme-choice{display:flex;gap:7px;margin-top:12px}.theme-choice button{flex:1;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:12px;padding:12px 6px;font-weight:700}.theme-choice button.selected{border-color:var(--accent);background:var(--soft);color:var(--accent)}.theme-label{font-size:13px;color:var(--muted);margin-top:9px}html[data-theme="dark"] .hero{background:linear-gradient(125deg,#075b4d,#078b6b)}
-@media(min-width:560px){nav button{min-width:92px}}@media(max-width:380px){nav button{padding:9px 5px;min-width:52px;font-size:11px}}
+<main>
+<section id="inicio" class="tab active">
+  <div class="overview">
+    <header class="overview-header">
+      <span class="app-mark" aria-hidden="true"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V11m5 9V5m5 15v-7m5 7V8"/><path d="M2 21h20"/></svg></span>
+      <div><p class="app-name">Mis Finanzas</p><div class="period"><button type="button" onclick="shiftMonth(-1)" aria-label="Mes anterior">‹</button><button type="button" class="month-label" onclick="pickMonth()"></button><button type="button" onclick="shiftMonth(1)" aria-label="Mes siguiente">›</button></div></div>
+      <select id="overviewCurrency" aria-label="Moneda del resumen"></select>
+    </header>
+    <div id="summary"></div>
+  </div>
+  <div class="screen-body home-body">
+    <section aria-labelledby="home-accounts-title">
+      <div class="section-line"><h2 id="home-accounts-title">Cuentas</h2><button class="link-button" type="button" onclick="show('contas')">Ver todas ›</button></div>
+      <div class="card account-panel"><div id="homeAccounts"></div><button class="btn account-add" type="button" onclick="openAccount()">Añadir cuenta</button><div id="accountTotal" class="account-total"></div></div>
+    </section>
+    <section aria-labelledby="home-movements-title">
+      <div class="section-line"><h2 id="home-movements-title">Últimos movimientos</h2><button class="link-button" type="button" onclick="show('movimentos')">Ver todos ›</button></div>
+      <div class="card" id="recent"></div>
+    </section>
+    <section aria-labelledby="home-category-title">
+      <div class="section-line"><h2 id="home-category-title">Gastos por categoría</h2><button class="link-button" type="button" onclick="show('relatorios')">Ver informes ›</button></div>
+      <div class="card" id="homeCategories"></div>
+    </section>
+  </div>
+</section>
 
-.bank-identity{display:flex;align-items:center;gap:12px;min-width:0}.bank-icon{width:43px;height:43px;object-fit:contain;border-radius:12px;flex-shrink:0}.bank-fallback{width:43px;height:43px;display:grid;place-items:center;border-radius:12px;background:var(--soft);color:var(--accent);font-size:21px;flex-shrink:0}.bank-identity strong{overflow-wrap:anywhere}.bank-preview{display:flex;align-items:center;gap:10px;padding:12px 0;color:var(--muted);font-size:13px}
+<section id="movimentos" class="tab">
+  <header class="purple-header">
+    <div class="purple-topline"><h1>Transacciones</h1><button id="transactionOptionsButton" class="options-button" type="button" aria-label="Opciones de transacciones" aria-expanded="false" aria-controls="transactionOptions" onclick="toggleTransactionOptions()">•••</button></div>
+    <div class="period"><button type="button" onclick="shiftMonth(-1)" aria-label="Mes anterior">‹</button><button type="button" class="month-label" onclick="pickMonth()"></button><button type="button" onclick="shiftMonth(1)" aria-label="Mes siguiente">›</button></div>
+  </header>
+  <div class="transaction-panel">
+    <div id="transactionSummary" class="transaction-summary"></div>
+    <div id="transactionOptions" class="transaction-options hidden">
+      <label class="checkbox-line"><input id="allPeriods" type="checkbox" onchange="render()"> Mostrar transacciones de todos los meses</label>
+      <button type="button" class="btn secondary" onclick="$('pendingExpenseFiles').click()">Actualizar gastos pendientes</button>
+      <input id="pendingExpenseFiles" type="file" accept=".json,application/json" multiple class="hidden" onchange="importarDespesasPendentes(event)">
+      <p class="note">Selecciona los archivos JSON que guardaste con Atajos en «En mi iPhone».</p>
+      <button type="button" class="btn secondary" onclick="importarDespesaCopiada()">Pegar gasto de Atajos</button>
+      <p class="note">Copia el enlace del gasto en Atajos y revisa los datos antes de guardar.</p>
+    </div>
+    <div class="filters"><select id="filterCurrency" aria-label="Filtrar por moneda" onchange="render()"><option value="">Todas las monedas</option><option>PYG</option><option>BRL</option><option>USD</option></select><select id="filterType" aria-label="Filtrar por tipo" onchange="render()"><option value="">Todos los tipos</option><option value="income">Ingresos</option><option value="expense">Gastos</option><option value="transfer">Transferencias</option></select></div>
+    <div id="transactions"></div>
+  </div>
+</section>
 
-/* Limites semanais independentes */
-.weekly-card .topline{align-items:center;gap:10px}.weekly-card .topline h2{margin:0}.weekly-budget{border:1px solid #e4eaf2;border-radius:16px;padding:15px;margin-top:13px}.weekly-budget .weekly-header{display:flex;justify-content:space-between;gap:8px;align-items:start}.weekly-budget .weekly-remaining{font-size:24px;font-weight:750;margin:8px 0}.weekly-budget .weekly-track{height:9px;background:#e8edf4;border-radius:99px;overflow:hidden;margin:12px 0}.weekly-budget .weekly-fill{height:100%;background:#0c9673;border-radius:99px}.weekly-budget .weekly-fill.over{background:#d34c5b}.weekly-budget .weekly-expenses{margin-top:12px}.weekly-budget .weekly-expense{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid #e9edf3}.weekly-budget .weekly-expense:last-child{border-bottom:0}.weekly-budget .weekly-actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}.weekly-budget .weekly-actions .btn{padding:8px 10px;font-size:12px}.weekly-dialog{width:min(92vw,460px);max-height:85vh;overflow:auto;border:0;border-radius:20px;padding:22px;background:#fff;color:#172033;box-shadow:0 20px 80px #0004}.weekly-dialog::backdrop{background:#11182799}.weekly-dialog h2{margin:0 0 12px}.weekly-dialog .actions{justify-content:flex-end}.weekly-budget .weekly-status{font-size:12px;color:#738095}.weekly-budget .weekly-expense button{padding:6px 8px}.weekly-card .note{font-size:12px;line-height:1.5}
-@media(prefers-color-scheme:dark){.weekly-dialog{background:#1a2634;color:#edf4fa}.weekly-budget{border-color:#3b4958}.weekly-budget .weekly-track{background:#354250}.weekly-budget .weekly-expense{border-color:#354250}}
-</style><style>nav button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;flex:1;min-width:0;padding:10px 3px!important;font-size:11px!important;line-height:1.2}nav .nav-icon{width:22px;height:22px;display:block;flex-shrink:0}nav button.active .nav-icon{stroke-width:2.3}nav{justify-content:space-around}nav button span{white-space:nowrap}@media(max-width:350px){nav button{font-size:10px!important}nav .nav-icon{width:20px;height:20px}}</style></head><body><main><header><div><small>TU ESPACIO FINANCIERO</small><h1>Mis Finanzas</h1></div><span class="pill">🔒 Local</span></header>
-<section id="inicio" class="tab active"><div class="topline"><h2>Resumen general</h2><input id="month" type="month" style="width:160px;padding:8px"></div><div id="summary"></div><div class="card"><div class="topline"><h2>Cuentas</h2><button class="btn secondary" onclick="openAccount()">+ Cuenta</button></div><div id="homeAccounts"></div></div><div class="card"><h2>Últimos movimientos</h2><div id="recent"></div></div><div class="card weekly-card"><div class="topline"><h2>Límite de gastos semanales</h2><button type="button" class="btn secondary" onclick="openWeeklyLimit()">+ Límite</button></div><p class="note">Cada límite dura 7 días desde su creación y se controla por separado de los movimientos y saldos de las cuentas.</p><div id="weeklyLimits"></div></div></section>
-<section id="movimentos" class="tab"><div class="topline"><h2>Movimientos</h2><button class="btn" onclick="openTransaction()">+ Nuevo</button></div><div class="card"><h2>Gastos pendientes (sin conexión)</h2><button type="button" class="btn" onclick="$('pendingExpenseFiles').click()">Actualizar gastos pendientes</button><input id="pendingExpenseFiles" type="file" accept=".json,application/json" multiple class="hidden" onchange="importarDespesasPendentes(event)"><p class="note">Selecciona los archivos JSON que guardaste con Atajos en «En mi iPhone». Los gastos nuevos se añadirán a tus registros. Los archivos ya importados se omitirán. iOS requiere que selecciones los archivos.</p></div><div class="card"><button type="button" class="btn secondary" onclick="importarDespesaCopiada()">Pegar gasto de Atajos</button><p class="note">Copia el enlace del gasto en Atajos. Luego abre esta aplicación desde la pantalla de inicio y toca este botón. Revisa los datos antes de guardar.</p></div><div class="card"><div class="inline"><select id="filterCurrency" onchange="render()"><option value="">Todas las monedas</option><option>PYG</option><option>BRL</option><option>USD</option></select><select id="filterType" onchange="render()"><option value="">Todos los tipos</option><option value="income">Ingresos</option><option value="expense">Gastos</option><option value="transfer">Transferencias</option></select></div><div id="transactions"></div></div></section>
-<section id="contas" class="tab"><div class="topline"><h2>Mis cuentas</h2><button class="btn" onclick="openAccount()">+ Cuenta</button></div><div id="accountList"></div><div class="card"><h2>Transferir entre cuentas</h2><button class="btn secondary" onclick="openTransfer()">Nueva transferencia →</button><p class="note">Puedes hacer transferencias entre cuentas de la misma moneda.</p></div></section>
-<section id="relatorios" class="tab"><h2>Informes mensuales</h2><div id="reports"></div></section>
-<section id="ajustes" class="tab"><h2>Configuración</h2><div class="card"><h2>☀️ Apariencia</h2><p class="note">Elige cómo quieres que se vea la aplicación en tu iPhone.</p><div class="theme-choice"><button type="button" data-theme-choice="light" onclick="setTheme('light')">☀️ Claro</button><button type="button" data-theme-choice="dark" onclick="setTheme('dark')">🌙 Oscuro</button><button type="button" data-theme-choice="auto" onclick="setTheme('auto')">◐ Auto</button></div><p class="theme-label" id="themeStatus"></p></div><div class="card"><h2>Categorías</h2><div id="categories"></div><label>Nueva categoría</label><div class="inline"><input id="newCategory" placeholder="Ej.: Gimnasio"><select id="newCategoryType"><option value="expense">Gasto</option><option value="income">Ingreso</option></select></div><div class="actions"><button class="btn" onclick="addCategory()">Añadir</button></div></div><div class="card"><h2>Copia de seguridad</h2><p class="note">Tus datos se guardan únicamente en este navegador y dispositivo. Haz copias de seguridad con frecuencia. Si borras los datos de Safari, cambias de dispositivo o eliminas el sitio, puedes perder tus registros.</p><div class="actions"><button class="btn" onclick="exportData()">Exportar copia</button><button class="btn secondary" onclick="document.getElementById('importFile').click()">Restaurar copia</button></div><input id="importFile" type="file" accept="application/json,.json" class="hidden" onchange="importData(event)"></div><div class="card"><h2>Acerca de</h2><p class="note">Aplicación personal gratuita. Si la instalas mediante HTTPS, funciona sin conexión después de abrirla por primera vez. No incluye sincronización, gestión de tarjetas de crédito ni conversión automática de monedas.</p></div></section>
-</main><nav aria-label="Navegación principal"><button type="button" class="active" data-tab="inicio"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg><span>Inicio</span></button><button type="button" data-tab="movimentos"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16m-4-4 4 4-4 4M20 17H4m4-4-4 4 4 4"/></svg><span>Registros</span></button><button type="button" data-tab="contas"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="15" rx="2"/><path d="M3 10h18M7 3h12a2 2 0 0 1 2 2v1"/><path d="M16 16h2"/></svg><span>Cuentas</span></button><button type="button" data-tab="relatorios"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V11m5 9V5m5 15v-7m5 7V8"/><path d="M2 21h20"/></svg><span>Informes</span></button><button type="button" data-tab="ajustes"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"/><path d="M19.4 15a1.8 1.8 0 0 0 .36 1.98l.07.07-2.78 2.78-.07-.07A1.8 1.8 0 0 0 15 19.4a1.8 1.8 0 0 0-1.4 1.65V22h-3.2v-.95A1.8 1.8 0 0 0 9 19.4a1.8 1.8 0 0 0-1.98.36l-.07.07-2.78-2.78.07-.07A1.8 1.8 0 0 0 4.6 15a1.8 1.8 0 0 0-1.65-1.4H2v-3.2h.95A1.8 1.8 0 0 0 4.6 9a1.8 1.8 0 0 0-.36-1.98l-.07-.07 2.78-2.78.07.07A1.8 1.8 0 0 0 9 4.6a1.8 1.8 0 0 0 1.4-1.65V2h3.2v.95A1.8 1.8 0 0 0 15 4.6a1.8 1.8 0 0 0 1.98-.36l.07-.07 2.78 2.78-.07.07A1.8 1.8 0 0 0 19.4 9a1.8 1.8 0 0 0 1.65 1.4H22v3.2h-.95A1.8 1.8 0 0 0 19.4 15Z"/></svg><span>Ajustes</span></button></nav><div id="toast"></div>
-<dialog id="modal"><h2 id="modalTitle"></h2><form id="form" onsubmit="saveForm(event)"><div id="formFields"></div><div class="actions"><button type="submit" class="btn">Guardar</button><button type="button" class="btn secondary" onclick="modal.close()">Cancelar</button><button type="button" class="btn danger hidden" id="deleteBtn" onclick="deleteCurrent()">Eliminar</button></div></form></dialog>
-<dialog id="weeklyDialog" class="weekly-dialog"><form id="weeklyForm"><h2 id="weeklyDialogTitle">Nuevo límite semanal</h2><div id="weeklyFields"></div><div class="actions"><button type="button" class="btn secondary" onclick="document.getElementById('weeklyDialog').close()">Cancelar</button><button type="submit" class="btn">Guardar</button></div></form></dialog>
+<section id="contas" class="tab"><div class="screen-header"><button class="back" type="button" onclick="show('ajustes')" aria-label="Volver a Más">‹</button><h1>Mis cuentas</h1></div>
+  <div class="screen-body"><div id="accountList"></div><div class="card account-actions"><button class="btn" type="button" onclick="openAccount()">Añadir cuenta</button><button class="btn secondary" type="button" onclick="openTransfer()">Nueva transferencia</button><p class="note">Puedes hacer transferencias entre cuentas de la misma moneda.</p></div></div>
+</section>
+
+<section id="relatorios" class="tab"><div class="screen-header"><button class="back" type="button" onclick="show('ajustes')" aria-label="Volver a Más">‹</button><h1>Informes mensuales</h1></div>
+  <div class="screen-body"><div class="period card"><button type="button" onclick="shiftMonth(-1)" aria-label="Mes anterior">‹</button><button type="button" class="month-label" onclick="pickMonth()"></button><button type="button" onclick="shiftMonth(1)" aria-label="Mes siguiente">›</button></div><div id="reports"></div></div>
+</section>
+
+<section id="presupuesto" class="tab">
+  <div class="screen-header"><h1>Presupuesto</h1></div>
+  <div class="screen-body"><div class="section-line"><h2>Límites de gastos semanales</h2><button type="button" class="btn" onclick="openWeeklyLimit()">+ Límite</button></div><div class="card weekly-card"><p class="note">Cada límite dura 7 días desde su creación y se controla por separado de los movimientos y saldos de las cuentas.</p><div id="weeklyLimits"></div></div></div>
+</section>
+
+<section id="ajustes" class="tab">
+  <div class="screen-header"><h1>Más opciones</h1></div>
+  <div class="screen-body">
+    <div class="card menu-list">
+      <button type="button" onclick="show('contas')"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="15" rx="2"/><path d="M3 10h18M7 3h12a2 2 0 0 1 2 2v1"/><path d="M16 16h2"/></svg><span>Cuentas</span><span aria-hidden="true">›</span></button>
+      <button type="button" onclick="show('relatorios')"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V11m5 9V5m5 15v-7m5 7V8"/><path d="M2 21h20"/></svg><span>Informes mensuales</span><span aria-hidden="true">›</span></button>
+    </div>
+    <div class="card"><h2>Apariencia</h2><div class="theme-choice" aria-label="Tema del app"><button type="button" data-theme-choice="light" onclick="setTheme('light')">Claro</button><button type="button" data-theme-choice="dark" onclick="setTheme('dark')">Oscuro</button><button type="button" data-theme-choice="auto" onclick="setTheme('auto')">Automático</button></div><p id="themeStatus" class="note theme-status"></p></div>
+    <div class="card"><h2>Categorías</h2><div id="categories"></div><label for="newCategory">Nueva categoría</label><div class="inline"><input id="newCategory" placeholder="Ej.: Gimnasio"><select id="newCategoryType" aria-label="Tipo de categoría"><option value="expense">Gasto</option><option value="income">Ingreso</option></select></div><div class="actions"><button class="btn" type="button" onclick="addCategory()">Añadir</button></div></div>
+    <div class="card"><h2>Copia de seguridad</h2><p class="note">Tus datos se guardan únicamente en este navegador y dispositivo. Haz copias de seguridad con frecuencia. Si borras los datos de Safari, cambias de dispositivo o eliminas el sitio, puedes perder tus registros.</p><div class="actions"><button class="btn" type="button" onclick="exportData()">Exportar copia</button><button class="btn secondary" type="button" onclick="$('importFile').click()">Restaurar copia</button></div><input id="importFile" type="file" accept="application/json,.json" class="hidden" onchange="importData(event)"></div>
+    <div class="card"><h2>Acerca de</h2><p class="note">Aplicación personal gratuita. Si la instalas mediante HTTPS, funciona sin conexión después de abrirla por primera vez. No incluye sincronización, gestión de tarjetas de crédito ni conversión automática de monedas.</p></div>
+  </div>
+</section>
+<input id="month" type="month" class="month-picker" tabindex="-1" aria-label="Seleccionar mes">
+</main>
+<nav aria-label="Navegación principal">
+  <button type="button" data-tab="inicio"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg><span>Inicio</span></button><button type="button" data-tab="movimentos"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16m-4-4 4 4-4 4M20 17H4m4-4-4 4 4 4"/></svg><span>Transacciones</span></button>
+  <button type="button" class="quick-button" aria-label="Nuevo movimiento" onclick="$('quickMenu').showModal()"><span aria-hidden="true">+</span></button>
+  <button type="button" data-tab="presupuesto"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V11m5 9V5m5 15v-7m5 7V8"/><path d="M2 21h20"/></svg><span>Presupuesto</span></button><button type="button" data-tab="ajustes"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"/><path d="M19.4 15a1.8 1.8 0 0 0 .36 1.98l.07.07-2.78 2.78-.07-.07A1.8 1.8 0 0 0 15 19.4a1.8 1.8 0 0 0-1.4 1.65V22h-3.2v-.95A1.8 1.8 0 0 0 9 19.4a1.8 1.8 0 0 0-1.98.36l-.07.07-2.78-2.78.07-.07A1.8 1.8 0 0 0 4.6 15a1.8 1.8 0 0 0-1.65-1.4H2v-3.2h.95A1.8 1.8 0 0 0 4.6 9a1.8 1.8 0 0 0-.36-1.98l-.07-.07 2.78-2.78.07.07A1.8 1.8 0 0 0 9 4.6a1.8 1.8 0 0 0 1.4-1.65V2h3.2v.95A1.8 1.8 0 0 0 15 4.6a1.8 1.8 0 0 0 1.98-.36l.07-.07 2.78 2.78-.07.07A1.8 1.8 0 0 0 19.4 9a1.8 1.8 0 0 0 1.65 1.4H22v3.2h-.95A1.8 1.8 0 0 0 19.4 15Z"/></svg><span>Más</span></button>
+</nav>
+<dialog id="quickMenu" aria-label="Nuevo movimiento">
+  <div class="quick-actions">
+    <button type="button" class="quick-transfer" onclick="quickAction('transfer')"><span aria-hidden="true">⇄</span>Transferencia</button>
+    <button type="button" class="quick-income" onclick="quickAction('income')"><span aria-hidden="true">↑</span>Ingreso</button>
+    <button type="button" class="quick-expense" onclick="quickAction('expense')"><span aria-hidden="true">↓</span>Gasto</button>
+  </div>
+  <button type="button" class="quick-close" aria-label="Cerrar" onclick="$('quickMenu').close()">×</button>
+</dialog>
+<div id="toast" role="status"></div>
+<dialog id="modal" aria-labelledby="modalTitle"><header class="dialog-header"><h2 id="modalTitle"></h2></header><form id="form" onsubmit="saveForm(event)"><div id="formFields"></div><div class="actions"><button type="submit" class="btn">Guardar</button><button type="button" class="btn secondary" onclick="$('modal').close()">Cancelar</button><button type="button" class="btn danger hidden" id="deleteBtn" onclick="deleteCurrent()">Eliminar</button></div></form></dialog>
+<dialog id="weeklyDialog" class="weekly-dialog" aria-labelledby="weeklyDialogTitle"><form id="weeklyForm"><h2 id="weeklyDialogTitle">Nuevo límite semanal</h2><div id="weeklyFields"></div><div class="actions"><button type="button" class="btn secondary" onclick="document.getElementById('weeklyDialog').close()">Cancelar</button><button type="submit" class="btn">Guardar</button></div></form></dialog>
 <script>
 const THEME_KEY='minhas_financas_theme_v2';
-function applyTheme(){const choice=localStorage.getItem(THEME_KEY)||'auto';const dark=choice==='dark'||(choice==='auto'&&window.matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.dataset.theme=dark?'dark':'light';document.querySelector('meta[name="theme-color"]').content=dark?'#09151b':'#f5f8fa';document.querySelectorAll('[data-theme-choice]').forEach(b=>b.classList.toggle('selected',b.dataset.themeChoice===choice));const label=document.getElementById('themeStatus');if(label)label.textContent=choice==='auto'?'Sigue la apariencia del iPhone.':choice==='dark'?'Modo oscuro activado.':'Modo claro activado.'}
+function applyTheme(){const choice=localStorage.getItem(THEME_KEY)||'auto';const dark=choice==='dark'||(choice==='auto'&&window.matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.dataset.theme=dark?'dark':'light';document.querySelector('meta[name="theme-color"]').content=dark?'#191427':'#ffffff';document.querySelectorAll('[data-theme-choice]').forEach(b=>{const selected=b.dataset.themeChoice===choice;b.classList.toggle('selected',selected);b.setAttribute('aria-pressed',String(selected))});const label=document.getElementById('themeStatus');if(label)label.textContent=choice==='auto'?'Sigue la apariencia del iPhone.':choice==='dark'?'Modo oscuro activado.':'Modo claro activado.'}
 function setTheme(value){try{localStorage.setItem(THEME_KEY,value)}catch{}applyTheme()}
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',applyTheme);
 applyTheme();
@@ -60,15 +369,140 @@ function resolveBank(a){
 function bankIcon(a){const b=resolveBank(a);const path=BANK_ICONS[b];return path?`<img class="bank-icon" src="${path}" alt="${b}" loading="eager" onerror="this.style.display='none';this.insertAdjacentHTML('afterend','<span class=bank-fallback>▣</span>')">`:'<span class="bank-fallback" aria-hidden="true">▣</span>'}
 function bankPreview(){const b=$('fBank')?.value||'';$('bankPreview').innerHTML=b?`<img class="bank-icon" src="${BANK_ICONS[b]}" alt=""> <span>${esc(BANKS.find(x=>x[0]===b)?.[1]||'')}</span>`:'<span class="bank-fallback">▣</span><span>Icono predeterminado de esta cuenta</span>'}
 
-function render(){const m=$('month').value||monthNow();let html='';for(const c of currencies){const aa=db.accounts.filter(a=>a.currency===c),tt=db.transactions.filter(t=>t.date.startsWith(m)&&account(t.accountId)?.currency===c),inc=tt.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0),exp=tt.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);html+=`<div class="card hero"><small class="muted">SALDO TOTAL · ${c}</small><h2>${money(aa.reduce((s,a)=>s+balance(a),0),c)}</h2><div class="grid" style="margin-top:17px"><div><small class="muted">↑ Ingresos del mes</small><div><strong>${money(inc,c)}</strong></div></div><div><small class="muted">↓ Gastos del mes</small><div><strong>${money(exp,c)}</strong></div></div></div></div>`} $('summary').innerHTML=html;
-const accRow=a=>`<div class="row"><div class="bank-identity">${bankIcon(a)}<div><strong>${esc(a.name)}</strong><div class="muted">${a.currency}</div></div></div><div class="right"><strong>${money(balance(a),a.currency)}</strong><button class="btn secondary" style="padding:5px 9px;margin-top:5px" onclick="openAccount('${a.id}')">Editar</button></div></div>`;$('homeAccounts').innerHTML=db.accounts.length?db.accounts.map(accRow).join(''):'<div class="empty">Registra tu primera cuenta.</div>';$('accountList').innerHTML=db.accounts.length?db.accounts.map(a=>`<div class="card">${accRow(a)}</div>`).join(''):'<div class="card empty">No hay cuentas registradas.</div>';
-let sorted=[...db.transactions].sort((a,b)=>b.date.localeCompare(a.date)||b.created.localeCompare(a.created));const txRow=t=>{const a=account(t.accountId),c=a?.currency||'BRL',label=t.type==='transfer'?'Transferencia → '+(account(t.toAccountId)?.name||'Cuenta'):t.description||categoryLabel(t.category,t.type);return `<div class="row"><div><strong>${esc(label)}</strong><div class="muted">${esc(t.date)} · ${esc(a?.name||'Cuenta eliminada')} · ${esc(categoryLabel(t.category,t.type))}</div></div><div class="right"><strong class="${t.type==='income'?'green':t.type==='expense'?'red':''}">${t.type==='income'?'+':t.type==='expense'?'-':'↔ '}${money(t.amount,c)}</strong><button class="btn secondary" style="padding:5px 9px;margin-top:5px" onclick="${t.type==='transfer'?'openTransfer':'openTransaction'}('${t.id}')">Editar</button></div></div>`};$('recent').innerHTML=sorted.slice(0,5).map(txRow).join('')||'<div class="empty">Aún no hay movimientos.</div>';renderWeeklyLimits();$('transactions').innerHTML=sorted.filter(t=>(!$('filterCurrency').value||account(t.accountId)?.currency===$('filterCurrency').value)&&(!$('filterType').value||t.type===$('filterType').value)).map(txRow).join('')||'<div class="empty">No se encontraron movimientos.</div>';
-let rep='';for(const c of currencies){const tt=db.transactions.filter(t=>t.date.startsWith(m)&&account(t.accountId)?.currency===c),expenses=tt.filter(t=>t.type==='expense'),total=expenses.reduce((s,t)=>s+t.amount,0),groups={};expenses.forEach(t=>groups[t.category]=(groups[t.category]||0)+t.amount);rep+=`<div class="card"><h2>Gastos · ${c}</h2><div class="stat">${money(total,c)}</div>${Object.entries(groups).sort((a,b)=>b[1]-a[1]).map(([name,val])=>`<div style="margin:15px 0"><div class="topline"><span>${esc(categoryLabel(name,'expense'))}</span><strong>${money(val,c)}</strong></div><div class="bar"><div class="fill" style="width:${total?val/total*100:0}%"></div></div></div>`).join('')||'<div class="empty">No hay gastos este mes.</div>'}</div>`}$('reports').innerHTML=rep;$('categories').innerHTML=db.categories.map(x=>`<div class="row"><span>${esc(categoryLabel(x.name,x.type))} <span class="badge">${x.type==='income'?'Ingreso':'Gasto'}</span></span><button class="btn secondary" style="padding:6px" onclick="removeCategory('${encodeURIComponent(x.name)}','${x.type}')">Eliminar</button></div>`).join('')}
-function show(tab){document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.id===tab));document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('active',x.dataset.tab===tab));render()}document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>show(b.dataset.tab));$('month').value=monthNow();$('month').onchange=render;
+const monthFormat = new Intl.DateTimeFormat('es-PY',{month:'long',year:'numeric'});
+const typeLabels = {income:'Ingreso',expense:'Gasto',transfer:'Transferencia'};
+const monthInput = $('month');
+monthInput.value = monthNow();
+monthInput.onchange = render;
+
+function monthDate(month) {
+ const [year, number] = month.split('-').map(Number);
+ return new Date(year,number-1,1);
+}
+function shiftMonth(offset) {
+ const date = monthDate(monthInput.value || monthNow());
+ date.setMonth(date.getMonth()+offset);
+ monthInput.value = date.getFullYear()+'-'+String(date.getMonth()+1).padStart(2,'0');
+ render();
+}
+function pickMonth() {
+ try {
+  if (typeof monthInput.showPicker === 'function') {
+   monthInput.showPicker();
+   return;
+  }
+ } catch {
+  // Some browsers restrict opening a native picker programmatically.
+ }
+ monthInput.classList.add('visible');
+ monthInput.focus();
+}
+monthInput.addEventListener('blur',()=>monthInput.classList.remove('visible'));
+
+function selectedCurrency() {
+ return $('overviewCurrency').value || db.accounts[0]?.currency || 'PYG';
+}
+function monthlyTotals(month,currency) {
+ const accounts = db.accounts.filter(a=>a.currency===currency);
+ const transactions = db.transactions.filter(t=>t.date.startsWith(month)&&account(t.accountId)?.currency===currency);
+ const income = transactions.filter(t=>t.type==='income').reduce((sum,t)=>sum+t.amount,0);
+ const expenses = transactions.filter(t=>t.type==='expense');
+ return {
+  balance: accounts.reduce((sum,a)=>sum+balance(a),0), income, expenses,
+  expense: expenses.reduce((sum,t)=>sum+t.amount,0)
+ };
+}
+function categoryBreakdown(totals,currency) {
+ if (!totals.expenses.length) return '<div class="empty"><span class="empty-icon" aria-hidden="true">◷</span>No hay gastos este mes.</div>';
+ const groups = new Map();
+ for (const tx of totals.expenses) {
+  groups.set(tx.category,(groups.get(tx.category)||0)+tx.amount);
+ }
+ return Array.from(groups).sort((a,b)=>b[1]-a[1]).map(([name,amount])=>
+  `<div class="breakdown-row"><div class="topline"><span>${esc(categoryLabel(name,'expense')||'Sin categoría')}</span><strong>${money(amount,currency)}</strong></div><div class="bar"><div class="fill" style="width:${totals.expense?amount/totals.expense*100:0}%"></div></div></div>`
+ ).join('');
+}
+function accountRow(a) {
+ return `<div class="row account-row"><div class="bank-identity">${bankIcon(a)}<div><div class="account-name">${esc(a.name)}</div><div class="account-balance">${money(balance(a),a.currency)} <span class="muted">· ${a.currency}</span></div></div></div><button class="btn secondary compact" type="button" onclick="openAccount('${a.id}')">Editar</button></div>`;
+}
+function transactionRow(t) {
+ const a = account(t.accountId);
+ const currency = a?.currency||'BRL';
+ const label = t.type==='transfer' ? 'Transferencia → '+(account(t.toAccountId)?.name||'Cuenta')
+  : t.description || categoryLabel(t.category,t.type) || typeLabels[t.type];
+ const edit = t.type==='transfer'?'openTransfer':'openTransaction';
+ const symbol = t.type==='transfer'?'⇄':t.type==='income'?'↑':'↓';
+ const sign = t.type==='transfer'?'':t.type==='income'?'+':'−';
+ return `<div class="row transaction-row"><span class="type-icon ${t.type}" aria-hidden="true">${symbol}</span><div class="transaction-text"><strong>${esc(label)}</strong><div class="muted">${esc(t.date)} · ${esc(a?.name||'Cuenta eliminada')}${t.description&&t.category?' · '+esc(categoryLabel(t.category,t.type)):''}</div></div><div class="right"><strong class="${t.type==='income'?'green':t.type==='expense'?'red':''}">${sign}${money(t.amount,currency)}</strong><button class="link-button" type="button" onclick="${edit}('${t.id}')">Editar</button></div></div>`;
+}
+function render() {
+ const month = monthInput.value || monthNow();
+ document.querySelectorAll('.month-label').forEach(label=>label.textContent=monthFormat.format(monthDate(month)));
+
+ const currency = selectedCurrency();
+ $('overviewCurrency').innerHTML = opt(currencies.map(code=>[code,code]),currency);
+ const totals = monthlyTotals(month,currency);
+ $('summary').innerHTML = `<div class="overview-balance"><p>Saldo actual en cuentas</p><strong>${money(totals.balance,currency)}</strong></div>
+ <div class="overview-flow"><div><span class="type-icon income" aria-hidden="true">↑</span><div><span>Ingresos del mes</span><strong class="green">${money(totals.income,currency)}</strong></div></div><div><span class="type-icon expense" aria-hidden="true">↓</span><div><span>Gastos del mes</span><strong class="red">${money(totals.expense,currency)}</strong></div></div></div>`;
+
+ const visibleAccounts = db.accounts.filter(a=>a.currency===currency);
+ $('homeAccounts').innerHTML = visibleAccounts.length?visibleAccounts.map(accountRow).join(''):`<div class="empty">No hay cuentas en ${currency}.</div>`;
+ $('accountTotal').innerHTML = `<span>Total · ${currency}</span><span>${money(totals.balance,currency)}</span>`;
+ $('accountList').innerHTML = db.accounts.length?`<div class="card account-panel">${db.accounts.map(accountRow).join('')}</div>`:'<div class="card empty">No hay cuentas registradas.</div>';
+ const sorted = [...db.transactions].sort((a,b)=>b.date.localeCompare(a.date)||b.created.localeCompare(a.created));
+ $('recent').innerHTML = sorted.slice(0,5).map(transactionRow).join('')||'<div class="empty">Aún no hay movimientos.</div>';
+ $('homeCategories').innerHTML = categoryBreakdown(totals,currency);
+
+ const currencyFilter = $('filterCurrency').value;
+ const typeFilter = $('filterType').value;
+ const allPeriods = $('allPeriods').checked;
+ const currencyForTransactions = currencyFilter||currency;
+ const txTotals = currencyForTransactions===currency?totals:monthlyTotals(month,currencyForTransactions);
+ $('transactionSummary').innerHTML = `<div><span>Saldo actual · ${currencyForTransactions}</span><strong>${money(txTotals.balance,currencyForTransactions)}</strong></div><div><span>Balance mensual · ${currencyForTransactions}</span><strong class="${txTotals.income<txTotals.expense?'red':'green'}">${money(txTotals.income-txTotals.expense,currencyForTransactions)}</strong></div>`;
+ const rows = sorted.filter(t=>(allPeriods||t.date.startsWith(month))
+  &&(!currencyFilter||account(t.accountId)?.currency===currencyFilter)
+  &&(!typeFilter||t.type===typeFilter));
+ $('transactions').innerHTML = rows.length?rows.map(transactionRow).join(''):'<div class="empty transactions-empty"><span class="empty-icon" aria-hidden="true">☷</span><strong>No hay transacciones para esta selección</strong><span>Usa el botón + para registrar un movimiento.</span></div>';
+
+ $('reports').innerHTML = currencies.map(code=>{
+  const report = code===currency?totals:monthlyTotals(month,code);
+  return `<div class="card"><div class="topline"><h2>Gastos · ${code}</h2><strong>${money(report.expense,code)}</strong></div>${categoryBreakdown(report,code)}</div>`;
+ }).join('');
+ $('categories').innerHTML = db.categories.map(x=>`<div class="row"><span>${esc(categoryLabel(x.name,x.type))} <span class="badge">${typeLabels[x.type]}</span></span><button type="button" class="btn secondary compact" onclick="removeCategory('${encodeURIComponent(x.name)}','${x.type}')">Eliminar</button></div>`).join('');
+ renderWeeklyLimits();
+}
+$('overviewCurrency').onchange = render;
+
+function show(tab) {
+ document.querySelectorAll('.tab').forEach(section=>section.classList.toggle('active',section.id===tab));
+ const activeTab = ['contas','relatorios'].includes(tab)?'ajustes':tab;
+ document.querySelectorAll('nav [data-tab]').forEach(button=>{
+  const active = button.dataset.tab===activeTab;
+  button.classList.toggle('active',active);
+  if (active) button.setAttribute('aria-current','page');
+  else button.removeAttribute('aria-current');
+ });
+ window.scrollTo(0,0);
+ render();
+}
+document.querySelectorAll('nav [data-tab]').forEach(button=>button.onclick=()=>show(button.dataset.tab));
+
+function toggleTransactionOptions() {
+ const hidden = $('transactionOptions').classList.toggle('hidden');
+ $('transactionOptionsButton').setAttribute('aria-expanded',String(!hidden));
+}
+function quickAction(type) {
+ $('quickMenu').close();
+ if (type==='transfer') openTransfer();
+ else openTransaction(undefined,type);
+}
+function updateTransactionAppearance() {
+ $('modal').dataset.kind = $('fType').value;
+}
 const opt=(items,selected)=>items.map(([v,l])=>`<option value="${esc(v)}" ${v===selected?'selected':''}>${esc(l)}</option>`).join('');const field=(label,id,type='text',value='',extra='')=>`<label for="${id}">${label}</label><input id="${id}" type="${type}" value="${esc(value)}" ${extra}>`;const select=(label,id,items,value)=>`<label for="${id}">${label}</label><select id="${id}">${opt(items,value)}</select>`;
-function startModal(title,formMode,id){mode=formMode;editing=id||null;$('modalTitle').textContent=title;$('deleteBtn').classList.toggle('hidden',!id);$('modal').showModal()}
+function startModal(title,formMode,id){mode=formMode;editing=id||null;$('modal').dataset.kind=formMode;$('modalTitle').textContent=title;$('deleteBtn').classList.toggle('hidden',!id);$('modal').showModal()}
 function openAccount(id){let a=account(id)||{};startModal(id?'Editar cuenta':'Nueva cuenta','account',id);$('formFields').innerHTML=field('Nombre de la cuenta','fName','text',a.name||'','required maxlength="60"')+select('Moneda','fCurrency',currencies.map(c=>[c,c]),a.currency||'PYG')+field('Saldo inicial','fInitial','number',a.initial??0,'step="0.01" required')+select('Banco / icono','fBank',BANKS,resolveBank(a))+'<div id="bankPreview" class="bank-preview"></div>';$('fBank').onchange=bankPreview;bankPreview();if(id){$('fCurrency').disabled=true;$('fInitial').disabled=db.transactions.some(t=>t.accountId===id||t.toAccountId===id)}}
-function openTransaction(id){if(!db.accounts.length){toast('Primero registra una cuenta');show('contas');return}let t=db.transactions.find(x=>x.id===id)||{};startModal(id?'Editar movimiento':'Nuevo movimiento','transaction',id);$('formFields').innerHTML=select('Tipo','fType',[['expense','Gasto'],['income','Ingreso']],t.type||'expense')+select('Cuenta','fAccount',db.accounts.map(a=>[a.id,a.name+' · '+a.currency]),t.accountId||db.accounts[0].id)+field('Importe','fAmount','number',t.amount||'','min="0.01" step="0.01" required')+field('Fecha','fDate','date',t.date||today(),'required')+field('Descripción','fDescription','text',t.description||'','maxlength="100"')+'<div id="catContainer"></div>';$('fType').onchange=renderCategory;$('fAccount').onchange=renderCategory;renderCategory(t.category)}
+function openTransaction(id,defaultType='expense'){if(!db.accounts.length){toast('Primero registra una cuenta');show('contas');return}let t=db.transactions.find(x=>x.id===id)||{};startModal(id?'Editar movimiento':'Nuevo movimiento','transaction',id);$('formFields').innerHTML=select('Tipo','fType',[['expense','Gasto'],['income','Ingreso']],t.type||defaultType)+select('Cuenta','fAccount',db.accounts.map(a=>[a.id,a.name+' · '+a.currency]),t.accountId||db.accounts[0].id)+field('Importe','fAmount','number',t.amount||'','min="0.01" step="0.01" required')+field('Fecha','fDate','date',t.date||today(),'required')+field('Descripción','fDescription','text',t.description||'','maxlength="100"')+'<div id="catContainer"></div>';$('fType').onchange=()=>{updateTransactionAppearance();renderCategory()};updateTransactionAppearance();$('fAccount').onchange=renderCategory;renderCategory(t.category)}
 function renderCategory(current){const type=$('fType').value;const cats=db.categories.filter(x=>x.type===type).map(x=>[x.name,categoryLabel(x.name,x.type)]);$('catContainer').innerHTML=select('Categoría','fCategory',cats,current||cats[0]?.[0]);}
 function openTransfer(id){if(db.accounts.length<2){toast('Primero registra dos cuentas');return}let t=db.transactions.find(x=>x.id===id)||{};startModal(id?'Editar transferencia':'Nueva transferencia','transfer',id);$('formFields').innerHTML=select('Cuenta de origen','fAccount',db.accounts.map(a=>[a.id,a.name+' · '+a.currency]),t.accountId||db.accounts[0].id)+select('Cuenta de destino','fTo',db.accounts.map(a=>[a.id,a.name+' · '+a.currency]),t.toAccountId||db.accounts[1].id)+field('Importe','fAmount','number',t.amount||'','min="0.01" step="0.01" required')+field('Fecha','fDate','date',t.date||today(),'required')}
 function saveForm(e){e.preventDefault();const v=id=>$(id).value;let obj;if(mode==='account'){const name=v('fName').trim();if(!name)return;obj={id:editing||uid(),name,currency:editing?account(editing).currency:v('fCurrency'),initial:editing&&$('fInitial').disabled?account(editing).initial:Number(v('fInitial')),bank:v('fBank')};if(editing)db.accounts=db.accounts.map(a=>a.id===editing?obj:a);else db.accounts.push(obj)}else{const amount=Number(v('fAmount')),accountId=v('fAccount'),date=v('fDate');if(!Number.isFinite(amount)||amount<=0)return alert('Ingresa un importe válido.');if(mode==='transfer'){const toAccountId=v('fTo');if(accountId===toAccountId)return alert('Selecciona cuentas distintas.');if(account(accountId)?.currency!==account(toAccountId)?.currency)return alert('Las transferencias requieren cuentas de la misma moneda.');obj={id:editing||uid(),type:'transfer',accountId,toAccountId,amount,date,category:'Transferência',description:'',created:db.transactions.find(t=>t.id===editing)?.created||new Date().toISOString()}}else{obj={id:editing||uid(),type:v('fType'),accountId,amount,date,category:v('fCategory'),description:v('fDescription').trim(),created:db.transactions.find(t=>t.id===editing)?.created||new Date().toISOString()}}if(editing)db.transactions=db.transactions.map(t=>t.id===editing?obj:t);else db.transactions.push(obj)}$('modal').close();save();toast('Guardado correctamente')}
@@ -136,6 +570,7 @@ function preencherDespesaDoAtalho(q){
  if(!db.accounts.length){alert('Registra una cuenta antes de usar el atajo.');return;}
  openTransaction();
  $('fType').value='expense';
+ updateTransactionAppearance();
  const requested=(q.get('conta')||'').trim().toLocaleLowerCase('pt-BR');
  if(requested){
   const found=db.accounts.find(a=>a.name.trim().toLocaleLowerCase('pt-BR')===requested)
@@ -224,5 +659,5 @@ $('weeklyForm').addEventListener('submit',e=>{
 function deleteWeeklyExpense(bid,eid){const b=db.weeklyBudgets.find(x=>x.id===bid);if(!b)return;const x=b.expenses.find(y=>y.id===eid);if(!x||!confirm('¿Eliminar este gasto del control semanal?'))return;b.expenses=b.expenses.filter(y=>y.id!==eid);save()}
 function deleteWeeklyLimit(id){const b=db.weeklyBudgets.find(x=>x.id===id);if(!b||!confirm('¿Eliminar este límite y todos sus gastos semanales? Se conservarán los movimientos y saldos de tus cuentas.'))return;db.weeklyBudgets=db.weeklyBudgets.filter(x=>x.id!==id);save()}
 
-render();abrirDespesaDoAtalho();if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+show('inicio');abrirDespesaDoAtalho();if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 </script></body></html>
