@@ -341,8 +341,118 @@ html[data-theme="light"] #inicio { background: #ecf3f9 }
 .account-name, .account-balance { font-size: 13px; font-weight: 400 }
 .account-balance { color: var(--income); margin-top: 2px }
 .account-add { display: block; width: min(100%, 260px); margin: 8px auto 12px }
-.account-total { display: flex; justify-content: space-between; gap: 8px; border-top: 1px solid var(--line); font-size: 13px; padding: 12px 1px 9px }
 .account-actions .btn { margin-right: 4px; margin-bottom: 4px }
+.home-body { padding-top: 5.55cqw }
+.home-accounts {
+  --account-ink: #090909;
+  --account-caption: #81858c;
+  --account-balance: #4dae54;
+  --account-action: #6115db;
+  --account-rule: #f1eff5;
+  --account-surface: #fff;
+  margin-inline: calc(2.73cqw - 15px);
+}
+html[data-theme="dark"] .home-accounts {
+  --account-ink: var(--ink);
+  --account-caption: var(--muted);
+  --account-balance: var(--income);
+  --account-action: var(--accent);
+  --account-rule: var(--line);
+  --account-surface: var(--surface);
+}
+.home-accounts-heading {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 4.55cqw;
+  margin-bottom: 2.55cqw;
+}
+.home-accounts-heading h2 {
+  color: var(--account-caption);
+  font-size: 3.58cqw;
+  line-height: 1.25;
+  font-weight: 400;
+}
+.home-accounts-heading button {
+  position: absolute;
+  right: 2.25cqw;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: end;
+  width: max(40px, 4.55cqw);
+  height: max(40px, 4.55cqw);
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: var(--account-ink);
+}
+.home-accounts-heading svg { width: 4.55cqw; height: 4.55cqw }
+.home-account-panel {
+  padding: 0 4.55cqw;
+  background: var(--account-surface);
+  color: var(--account-ink);
+  border-radius: 6.35cqw;
+  box-shadow: 0 1.1cqw 2.55cqw rgba(22, 38, 56, .14);
+}
+.home-account-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) max(40px, 4.1cqw);
+  min-height: 17.05cqw;
+}
+.home-account-row + .home-account-row { border-top: max(1px, .25cqw) solid var(--account-rule) }
+.home-account-identity, .home-account-add-movement {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  border: 0;
+}
+.home-account-identity {
+  gap: 3.64cqw;
+  text-align: left;
+}
+.home-account-identity .bank-icon,
+.home-account-identity .bank-fallback,
+.home-account-identity .wallet-icon {
+  flex: 0 0 6.82cqw;
+  width: 6.82cqw;
+  height: 6.82cqw;
+}
+.home-account-identity .bank-icon { border-radius: 25%; background: transparent }
+.home-account-identity .wallet-icon { color: #149fc0 }
+.home-account-text {
+  display: grid;
+  gap: 1.08cqw;
+  min-width: 0;
+  padding-block: 1.6cqw;
+  font-size: 3.06cqw;
+  font-weight: 400;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+.home-account-text span + span { color: var(--account-balance) }
+.home-account-text .negative { color: var(--expense) }
+.home-account-add-movement { justify-content: end; color: var(--account-action) }
+.home-account-add-movement svg { width: 4.1cqw; height: 4.1cqw }
+.home-account-total {
+  border-top: max(1px, .4cqw) solid var(--account-rule);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 15.15cqw;
+  font-size: 3.52cqw;
+  font-weight: 400;
+  line-height: 1.18;
+  overflow-wrap: anywhere;
+}
+.home-account-total span:last-child { text-align: right }
+.home-accounts .account-add { margin: 0 auto 12px }
+
 .transaction-row { padding: 9px 0; justify-content: flex-start; font-size: 13px }
 .transaction-text { flex: 1; min-width: 0; overflow-wrap: anywhere }
 .transaction-text strong { font-weight: 620 }
@@ -476,9 +586,18 @@ dialog::backdrop { background: rgba(18,10,29,.58) }
     </div>
   </div>
   <div class="screen-body home-body">
-    <section aria-labelledby="home-accounts-title">
-      <div class="section-line"><h2 id="home-accounts-title">Cuentas</h2><button class="link-button" type="button" onclick="show('contas')">Ver todas ›</button></div>
-      <div class="card account-panel"><div id="homeAccounts"></div><button class="btn account-add" type="button" onclick="openAccount()">Añadir cuenta</button><div id="accountTotal" class="account-total"></div></div>
+    <section class="home-accounts" aria-labelledby="home-accounts-title">
+      <div class="home-accounts-heading">
+        <h2 id="home-accounts-title">Cuentas</h2>
+        <button type="button" onclick="show('contas')" aria-label="Ver todas las cuentas">
+          <svg viewBox="0 0 60 60" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.8"><rect x="2.5" y="2.5" width="22" height="55" rx="2.5"/><rect x="35.5" y="2.5" width="22" height="55" rx="2.5"/></svg>
+        </button>
+      </div>
+      <div class="home-account-panel">
+        <div id="homeAccounts"></div>
+        <button class="btn account-add" id="homeAddAccount" type="button" onclick="openAccount()">Añadir cuenta</button>
+        <div id="accountTotal" class="home-account-total"></div>
+      </div>
     </section>
     <section aria-labelledby="home-movements-title">
       <div class="section-line"><h2 id="home-movements-title">Últimos movimientos</h2><button class="link-button" type="button" onclick="show('movimentos')">Ver todos ›</button></div>
@@ -673,6 +792,20 @@ function categoryBreakdown(totals,currency) {
   `<div class="breakdown-row"><div class="topline"><span>${esc(categoryLabel(name,'expense')||'Sin categoría')}</span><strong>${money(amount,currency)}</strong></div><div class="bar"><div class="fill" style="width:${totals.expense?amount/totals.expense*100:0}%"></div></div></div>`
  ).join('');
 }
+function homeAccountRow(a) {
+ const amount = balance(a);
+ const id = esc(JSON.stringify(String(a.id)));
+ const name = esc(a.name);
+ const icon = resolveBank(a)?bankIcon(a):`<svg class="wallet-icon" viewBox="0 0 90 90" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="17" width="86" height="56" rx="12"/><path d="M45 27v35m9-26H42a5 5 0 0 0 0 10h6a5 5 0 0 1 0 10H35"/></svg>`;
+ return `<div class="home-account-row">
+  <button class="home-account-identity" type="button" aria-label="Editar cuenta: ${name}" onclick="openAccount(${id})">
+   ${icon}<span class="home-account-text"><span>${name}</span><span class="${amount<0?'negative':''}">${overviewAmount(amount,a.currency)}</span></span>
+  </button>
+  <button class="home-account-add-movement" type="button" aria-label="Añadir movimiento en ${name}" onclick="openTransaction(undefined,'expense',${id})">
+   <svg viewBox="0 0 54 54" aria-hidden="true"><path d="M27 4v46M5 27h44" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round"/></svg>
+  </button>
+ </div>`;
+}
 function accountRow(a) {
  return `<div class="row account-row"><div class="bank-identity">${bankIcon(a)}<div><div class="account-name">${esc(a.name)}</div><div class="account-balance">${money(balance(a),a.currency)} <span class="muted">· ${a.currency}</span></div></div></div><button class="btn secondary compact" type="button" onclick="openAccount('${a.id}')">Editar</button></div>`;
 }
@@ -700,8 +833,9 @@ function render() {
  renderOverview(totals,currency);
 
  const visibleAccounts = db.accounts.filter(a=>a.currency===currency);
- $('homeAccounts').innerHTML = visibleAccounts.length?visibleAccounts.map(accountRow).join(''):`<div class="empty">No hay cuentas en ${currency}.</div>`;
- $('accountTotal').innerHTML = `<span>Total · ${currency}</span><span>${money(totals.balance,currency)}</span>`;
+ $('homeAccounts').innerHTML = visibleAccounts.length?visibleAccounts.map(homeAccountRow).join(''):`<div class="empty">No hay cuentas en ${currency}.</div>`;
+ $('homeAddAccount').classList.toggle('hidden',visibleAccounts.length>0);
+ $('accountTotal').innerHTML = `<span>Total</span><span>${overviewAmount(totals.balance,currency)}</span>`;
  $('accountList').innerHTML = db.accounts.length?`<div class="card account-panel">${db.accounts.map(accountRow).join('')}</div>`:'<div class="card empty">No hay cuentas registradas.</div>';
  const sorted = [...db.transactions].sort((a,b)=>b.date.localeCompare(a.date)||b.created.localeCompare(a.created));
  $('recent').innerHTML = sorted.slice(0,5).map(transactionRow).join('')||'<div class="empty">Aún no hay movimientos.</div>';
@@ -756,7 +890,7 @@ function updateTransactionAppearance() {
 const opt=(items,selected)=>items.map(([v,l])=>`<option value="${esc(v)}" ${v===selected?'selected':''}>${esc(l)}</option>`).join('');const field=(label,id,type='text',value='',extra='')=>`<label for="${id}">${label}</label><input id="${id}" type="${type}" value="${esc(value)}" ${extra}>`;const select=(label,id,items,value)=>`<label for="${id}">${label}</label><select id="${id}">${opt(items,value)}</select>`;
 function startModal(title,formMode,id){mode=formMode;editing=id||null;$('modal').dataset.kind=formMode;$('modalTitle').textContent=title;$('deleteBtn').classList.toggle('hidden',!id);$('modal').showModal()}
 function openAccount(id){let a=account(id)||{};startModal(id?'Editar cuenta':'Nueva cuenta','account',id);$('formFields').innerHTML=field('Nombre de la cuenta','fName','text',a.name||'','required maxlength="60"')+select('Moneda','fCurrency',currencies.map(c=>[c,c]),a.currency||'PYG')+field('Saldo inicial','fInitial','number',a.initial??0,'step="0.01" required')+select('Banco / icono','fBank',BANKS,resolveBank(a))+'<div id="bankPreview" class="bank-preview"></div>';$('fBank').onchange=bankPreview;bankPreview();if(id){$('fCurrency').disabled=true;$('fInitial').disabled=db.transactions.some(t=>t.accountId===id||t.toAccountId===id)}}
-function openTransaction(id,defaultType='expense'){if(!db.accounts.length){toast('Primero registra una cuenta');show('contas');return}let t=db.transactions.find(x=>x.id===id)||{};startModal(id?'Editar movimiento':'Nuevo movimiento','transaction',id);$('formFields').innerHTML=select('Tipo','fType',[['expense','Gasto'],['income','Ingreso']],t.type||defaultType)+select('Cuenta','fAccount',db.accounts.map(a=>[a.id,a.name+' · '+a.currency]),t.accountId||db.accounts[0].id)+field('Importe','fAmount','number',t.amount||'','min="0.01" step="0.01" required')+field('Fecha','fDate','date',t.date||today(),'required')+field('Descripción','fDescription','text',t.description||'','maxlength="100"')+'<div id="catContainer"></div>';$('fType').onchange=()=>{updateTransactionAppearance();renderCategory()};updateTransactionAppearance();$('fAccount').onchange=renderCategory;renderCategory(t.category)}
+function openTransaction(id,defaultType='expense',defaultAccountId){if(!db.accounts.length){toast('Primero registra una cuenta');show('contas');return}let t=db.transactions.find(x=>x.id===id)||{};startModal(id?'Editar movimiento':'Nuevo movimiento','transaction',id);$('formFields').innerHTML=select('Tipo','fType',[['expense','Gasto'],['income','Ingreso']],t.type||defaultType)+select('Cuenta','fAccount',db.accounts.map(a=>[a.id,a.name+' · '+a.currency]),t.accountId||account(defaultAccountId)?.id||db.accounts[0].id)+field('Importe','fAmount','number',t.amount||'','min="0.01" step="0.01" required')+field('Fecha','fDate','date',t.date||today(),'required')+field('Descripción','fDescription','text',t.description||'','maxlength="100"')+'<div id="catContainer"></div>';$('fType').onchange=()=>{updateTransactionAppearance();renderCategory()};updateTransactionAppearance();$('fAccount').onchange=renderCategory;renderCategory(t.category)}
 function renderCategory(current){const type=$('fType').value;const cats=db.categories.filter(x=>x.type===type).map(x=>[x.name,categoryLabel(x.name,x.type)]);$('catContainer').innerHTML=select('Categoría','fCategory',cats,current||cats[0]?.[0]);}
 function openTransfer(id){if(db.accounts.length<2){toast('Primero registra dos cuentas');return}let t=db.transactions.find(x=>x.id===id)||{};startModal(id?'Editar transferencia':'Nueva transferencia','transfer',id);$('formFields').innerHTML=select('Cuenta de origen','fAccount',db.accounts.map(a=>[a.id,a.name+' · '+a.currency]),t.accountId||db.accounts[0].id)+select('Cuenta de destino','fTo',db.accounts.map(a=>[a.id,a.name+' · '+a.currency]),t.toAccountId||db.accounts[1].id)+field('Importe','fAmount','number',t.amount||'','min="0.01" step="0.01" required')+field('Fecha','fDate','date',t.date||today(),'required')}
 function saveForm(e){e.preventDefault();const v=id=>$(id).value;let obj;if(mode==='account'){const name=v('fName').trim();if(!name)return;obj={id:editing||uid(),name,currency:editing?account(editing).currency:v('fCurrency'),initial:editing&&$('fInitial').disabled?account(editing).initial:Number(v('fInitial')),bank:v('fBank')};if(editing)db.accounts=db.accounts.map(a=>a.id===editing?obj:a);else db.accounts.push(obj)}else{const amount=Number(v('fAmount')),accountId=v('fAccount'),date=v('fDate');if(!Number.isFinite(amount)||amount<=0)return alert('Ingresa un importe válido.');if(mode==='transfer'){const toAccountId=v('fTo');if(accountId===toAccountId)return alert('Selecciona cuentas distintas.');if(account(accountId)?.currency!==account(toAccountId)?.currency)return alert('Las transferencias requieren cuentas de la misma moneda.');obj={id:editing||uid(),type:'transfer',accountId,toAccountId,amount,date,category:'Transferência',description:'',created:db.transactions.find(t=>t.id===editing)?.created||new Date().toISOString()}}else{obj={id:editing||uid(),type:v('fType'),accountId,amount,date,category:v('fCategory'),description:v('fDescription').trim(),created:db.transactions.find(t=>t.id===editing)?.created||new Date().toISOString()}}if(editing)db.transactions=db.transactions.map(t=>t.id===editing?obj:t);else db.transactions.push(obj)}$('modal').close();save();toast('Guardado correctamente')}
