@@ -819,6 +819,30 @@ html[data-theme="dark"] #modal[data-kind="income"] { --entry-category: #d5a2fc }
 .entry-capsule > span:first-child { display: grid; place-items: center; flex: none }
 .entry-capsule > span:first-child svg { width: 3.65cqw; height: 3.65cqw; color: var(--entry-choice) }
 #modal:is([data-kind="income"],[data-kind="expense"]) { overflow: auto }
+.closing-body > section + section { margin-top: 12px }
+.closing-dates { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px }
+.closing-dates input { min-width: 0; max-width: 100% }
+#closingStatus:empty { display: none }
+#closingTotals { display: grid; gap: 8px; margin-top: 10px }
+.closing-currency {
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+.closing-currency h3 { margin: 0; font-size: 12px; color: var(--muted) }
+.closing-amounts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(83px, 100%), 1fr));
+  gap: 8px;
+  margin: 7px 0 0;
+}
+.closing-amounts > div { min-width: 0; overflow-wrap: anywhere }
+.closing-amounts dt { color: var(--muted); font-size: 11px }
+.closing-amounts dd { margin: 2px 0 0; font-size: 13px; font-weight: 650 }
+.report-closing-link { display: block; width: fit-content; margin: 10px 0 12px auto }
+@media (max-width: 355px) {
+  .closing-dates { grid-template-columns: 1fr }
+}
 </style></head><body>
 
 <main>
@@ -897,7 +921,37 @@ html[data-theme="dark"] #modal[data-kind="income"] { --entry-category: #d5a2fc }
 </section>
 
 <section id="relatorios" class="tab"><div class="screen-header"><button class="back" type="button" onclick="show('ajustes')" aria-label="Volver a Más">‹</button><h1>Informes mensuales</h1></div>
-  <div class="screen-body"><div class="period card"><button type="button" onclick="shiftMonth(-1)" aria-label="Mes anterior">‹</button><button type="button" class="month-label" onclick="pickMonth()"></button><button type="button" onclick="shiftMonth(1)" aria-label="Mes siguiente">›</button></div><div id="reports"></div></div>
+  <div class="screen-body"><div class="period card"><button type="button" onclick="shiftMonth(-1)" aria-label="Mes anterior">‹</button><button type="button" class="month-label" onclick="pickMonth()"></button><button type="button" onclick="shiftMonth(1)" aria-label="Mes siguiente">›</button></div><button class="btn secondary report-closing-link" type="button" onclick="show('cierre')">Cierre mensual ›</button><div id="reports"></div></div>
+</section>
+
+<section id="cierre" class="tab">
+  <div class="screen-header"><button class="back" type="button" onclick="show('relatorios')" aria-label="Volver a Informes mensuales">‹</button><h1>Cierre mensual</h1></div>
+  <div class="screen-body closing-body">
+    <div class="period card">
+      <button type="button" onclick="shiftMonth(-1)" aria-label="Mes anterior">‹</button>
+      <button type="button" class="month-label" onclick="pickMonth()"></button>
+      <button type="button" onclick="shiftMonth(1)" aria-label="Mes siguiente">›</button>
+    </div>
+    <form id="closingForm" class="card" onsubmit="saveMonthlyClosing(event)">
+      <h2>Período del cierre</h2>
+      <div class="closing-dates">
+        <div><label for="closingStart">Fecha de apertura</label><input id="closingStart" type="date" min="0001-01-01" max="9999-12-31" required></div>
+        <div><label for="closingEnd">Fecha de cierre</label><input id="closingEnd" type="date" min="0001-01-01" max="9999-12-31" required></div>
+      </div>
+      <div class="actions"><button class="btn" type="submit">Guardar fechas</button></div>
+      <p id="closingStatus" class="note" role="status"></p>
+    </form>
+    <section class="card" aria-labelledby="closingTotalsTitle">
+      <h2 id="closingTotalsTitle">Resumen del período</h2>
+      <div id="closingTotals"></div>
+      <p class="note">El resultado se calcula con los ingresos y gastos realizados. Las transferencias y los pendientes se muestran en los movimientos del período.</p>
+    </section>
+    <section class="card" aria-labelledby="closingMovementsTitle">
+      <div class="topline"><h2 id="closingMovementsTitle">Movimientos del período</h2><span id="closingCount" class="badge"></span></div>
+      <p class="note" id="closingRange"></p>
+      <div id="closingTransactions"></div>
+    </section>
+  </div>
 </section>
 
 <section id="presupuesto" class="tab">
@@ -911,6 +965,7 @@ html[data-theme="dark"] #modal[data-kind="income"] { --entry-category: #d5a2fc }
     <div class="card menu-list">
       <button type="button" onclick="show('contas')"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="15" rx="2"/><path d="M3 10h18M7 3h12a2 2 0 0 1 2 2v1"/><path d="M16 16h2"/></svg><span>Cuentas</span><span aria-hidden="true">›</span></button>
       <button type="button" onclick="show('relatorios')"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V11m5 9V5m5 15v-7m5 7V8"/><path d="M2 21h20"/></svg><span>Informes mensuales</span><span aria-hidden="true">›</span></button>
+      <button type="button" onclick="show('cierre')"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V11m5 9V5m5 15v-7m5 7V8"/><path d="M2 21h20"/></svg><span>Cierre mensual</span><span aria-hidden="true">›</span></button>
     </div>
     <div class="card"><h2>Apariencia</h2><div class="theme-choice" aria-label="Tema del app"><button type="button" data-theme-choice="light" onclick="setTheme('light')">Claro</button><button type="button" data-theme-choice="dark" onclick="setTheme('dark')">Oscuro</button><button type="button" data-theme-choice="auto" onclick="setTheme('auto')">Automático</button></div><p id="themeStatus" class="note theme-status"></p></div>
     <div class="card"><h2>Categorías</h2><div id="categories"></div><label for="newCategory">Nueva categoría</label><div class="inline"><input id="newCategory" placeholder="Ej.: Gimnasio"><select id="newCategoryType" aria-label="Tipo de categoría"><option value="expense">Gasto</option><option value="income">Ingreso</option></select></div><div class="actions"><button class="btn" type="button" onclick="addCategory()">Añadir</button></div></div>
@@ -1077,7 +1132,7 @@ function homeAccountRow(a) {
 function accountRow(a) {
  return `<div class="row account-row"><div class="bank-identity">${bankIcon(a)}<div><div class="account-name">${esc(a.name)}</div><div class="account-balance">${money(balance(a),a.currency)} <span class="muted">· ${a.currency}</span></div></div></div><button class="btn secondary compact" type="button" onclick="openAccount('${a.id}')">Editar</button></div>`;
 }
-function transactionRow(t) {
+function transactionRow(t,showType=false) {
  const a = account(t.accountId);
  const currency = a?.currency||'BRL';
  const label = t.type==='transfer' ? 'Transferencia → '+(account(t.toAccountId)?.name||'Cuenta')
@@ -1085,8 +1140,84 @@ function transactionRow(t) {
  const edit = t.type==='transfer'?'openTransfer':'openTransaction';
  const symbol = t.type==='transfer'?'⇄':t.type==='income'?'↑':'↓';
  const sign = t.type==='transfer'?'':t.type==='income'?'+':'−';
- return `<div class="row transaction-row"><span class="type-icon ${t.type}" aria-hidden="true">${symbol}</span><div class="transaction-text"><strong>${esc(label)}</strong>${t.favorite?'<span class="badge" aria-label="Favorito">♥</span>':''}${!isRealized(t)?'<span class="badge">Pendiente</span>':''}<div class="muted">${esc(t.date)} · ${esc(a?.name||'Cuenta eliminada')}${t.description&&t.category?' · '+esc(categoryLabel(t.category,t.type)):''}</div></div><div class="right"><strong class="${t.type==='income'?'green':t.type==='expense'?'red':''}">${sign}${money(t.amount,currency)}</strong><button class="link-button" type="button" onclick="${edit}('${t.id}')">Editar</button></div></div>`;
+ const id = esc(JSON.stringify(String(t.id)));
+ return `<div class="row transaction-row"><span class="type-icon ${t.type}" aria-hidden="true">${symbol}</span><div class="transaction-text"><strong>${esc(label)}</strong>${t.favorite?'<span class="badge" aria-label="Favorito">♥</span>':''}${!isRealized(t)?'<span class="badge">Pendiente</span>':''}<div class="muted">${showType===true&&typeLabels[t.type]?typeLabels[t.type]+' · ':''}${esc(t.date)} · ${esc(a?.name||'Cuenta eliminada')}${t.description&&t.category?' · '+esc(categoryLabel(t.category,t.type)):''}</div></div><div class="right"><strong class="${t.type==='income'?'green':t.type==='expense'?'red':''}">${sign}${money(t.amount,currency)}</strong><button class="link-button" type="button" onclick="${edit}(${id})">Editar</button></div></div>`;
 }
+const closingDateFormat = new Intl.DateTimeFormat('es-PY',{dateStyle:'short',timeZone:'UTC'});
+
+function isClosingDate(value) {
+ return typeof value==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(value)&&!value.startsWith('0000-')
+  &&new Date(value+'T00:00:00Z').toJSON()?.slice(0,10)===value;
+}
+
+function closingPeriod(month) {
+ const saved = db.monthlyClosings?.[month];
+ if(isClosingDate(saved?.start)&&isClosingDate(saved?.end)&&saved.start<=saved.end)return saved;
+
+ const start = month+'-01';
+ const end = new Date(start+'T00:00:00Z');
+ end.setUTCMonth(end.getUTCMonth()+1,0);
+ return {start,end:end.toISOString().slice(0,10)};
+}
+
+function renderMonthlyClosing(month,sorted) {
+ const form = $('closingForm');
+ const {start,end} = closingPeriod(month);
+ if(form.dataset.month!==month)$('closingStatus').textContent='';
+ form.dataset.month=month;
+ $('closingStart').value=start;
+ $('closingEnd').value=end;
+
+ const transactions = sorted.filter(t=>t.date>=start&&t.date<=end);
+ const totals = new Map();
+ for(const a of db.accounts)totals.set(a.currency,{income:0,expense:0});
+ for(const t of transactions){
+  const currency = account(t.accountId)?.currency||account(t.toAccountId)?.currency||'BRL';
+  if(!totals.has(currency))totals.set(currency,{income:0,expense:0});
+  if(isRealized(t)&&(t.type==='income'||t.type==='expense'))totals.get(currency)[t.type]+=Number(t.amount);
+ }
+ if(!totals.size)totals.set(selectedCurrency(),{income:0,expense:0});
+
+ $('closingTotals').innerHTML=currencies.filter(code=>totals.has(code)).map(code=>{
+  const {income,expense}=totals.get(code);
+  const net=income-expense;
+  return `<div class="closing-currency"><h3>${code}</h3><dl class="closing-amounts">
+   <div><dt>Ingresos</dt><dd class="green">${overviewAmount(income,code)}</dd></div>
+   <div><dt>Gastos</dt><dd class="red">${overviewAmount(expense,code)}</dd></div>
+   <div><dt>Resultado</dt><dd class="${net<0?'red':net>0?'green':''}">${overviewAmount(net,code)}</dd></div>
+  </dl></div>`;
+ }).join('');
+
+ $('closingCount').textContent=String(transactions.length);
+ $('closingRange').textContent=closingDateFormat.format(new Date(start))+' – '+closingDateFormat.format(new Date(end));
+ $('closingTransactions').innerHTML=transactions.length?transactions.map(t=>transactionRow(t,true)).join('')
+  :'<div class="empty">No hay movimientos en este período.</div>';
+}
+
+function saveMonthlyClosing(event) {
+ event.preventDefault();
+ const month=$('closingForm').dataset.month;
+ if(!isClosingDate(month+'-01'))return;
+ const start=$('closingStart').value;
+ const end=$('closingEnd').value;
+ const status=$('closingStatus');
+ if(!isClosingDate(start)||!isClosingDate(end)||start>end){
+  status.textContent='La fecha de apertura debe ser anterior o igual a la fecha de cierre.';
+  return;
+ }
+
+ const next={...db,monthlyClosings:{...db.monthlyClosings,[month]:{start,end}}};
+ try {
+  localStorage.setItem(KEY,JSON.stringify(next));
+ } catch {
+  status.textContent='No se pudieron guardar las fechas. Comprueba el espacio de almacenamiento disponible.';
+  return;
+ }
+ db=next;
+ render();
+ status.textContent='Fechas guardadas.';
+}
+
 function render() {
  const month = monthInput.value || monthNow();
  const selectedMonth = monthDate(month);
@@ -1126,12 +1257,13 @@ function render() {
  }).join('');
  $('categories').innerHTML = db.categories.map(x=>`<div class="row"><span>${esc(categoryLabel(x.name,x.type))} <span class="badge">${typeLabels[x.type]}</span></span><button type="button" class="btn secondary compact" onclick="removeCategory('${encodeURIComponent(x.name)}','${x.type}')">Eliminar</button></div>`).join('');
  renderWeeklyLimits();
+ if($('cierre').classList.contains('active'))renderMonthlyClosing(isClosingDate(month+'-01')?month:monthNow(),sorted);
 }
 $('overviewCurrency').onchange = render;
 
 function show(tab) {
  document.querySelectorAll('.tab').forEach(section=>section.classList.toggle('active',section.id===tab));
- const activeTab = ['contas','relatorios'].includes(tab)?'ajustes':tab;
+ const activeTab = ['contas','relatorios','cierre'].includes(tab)?'ajustes':tab;
  document.querySelectorAll('nav [data-tab]').forEach(button=>{
   const active = button.dataset.tab===activeTab;
   button.classList.toggle('active',active);
