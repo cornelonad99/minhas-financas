@@ -541,10 +541,6 @@ dialog {
 dialog::backdrop { background: rgba(18,10,29,.58) }
 #modal { padding: 0 }
 .dialog-header { background: #5b13d0; color: white; padding: 17px 16px }
-#modal[data-kind="income"] .dialog-header { background: #267d46 }
-#modal[data-kind="expense"] .dialog-header { background: #b52344 }
-#modal[data-kind="expense"] .actions .btn[type="submit"] { background: #b52344 }
-#modal[data-kind="income"] .actions .btn[type="submit"] { background: #267d46 }
 #form { padding: 3px 15px 16px }
 .bank-preview { display: flex; align-items: center; gap: 8px; font-size: 13px; margin-top: 10px }
 .weekly-budget { border: 1px solid var(--line); border-radius: 14px; padding: 12px; margin-top: 10px }
@@ -557,6 +553,272 @@ dialog::backdrop { background: rgba(18,10,29,.58) }
 .weekly-expense { font-size: 13px; padding-top: 8px; margin-top: 8px; border-top: 1px solid var(--line) }
 .weekly-expense .btn { display: block; margin: 3px 0 0 auto }
 #toast { display: none; position: fixed; z-index: 6; bottom: calc(var(--nav-height) + env(safe-area-inset-bottom) + 13px); left: 50%; transform: translateX(-50%); width: max-content; max-width: calc(100% - 24px); padding: 10px 14px; border-radius: 100px; background: var(--ink); color: var(--surface); font-size: 13px }
+#modal:is([data-kind="income"],[data-kind="expense"]) {
+  --entry-hero: #f34235;
+  --entry-accent: #c2352a;
+  --entry-cancel: #ffbcb4;
+  --entry-surface: #fefefe;
+  --entry-ink: #080808;
+  --entry-muted: #85858e;
+  --entry-divider: #f0f0f6;
+  --entry-category: #c3221a;
+  --entry-account: #3397c2;
+  box-sizing: border-box;
+  inset: 0;
+  width: min(100%, 620px);
+  max-width: none;
+  height: 100vh;
+  height: 100dvh;
+  max-height: none;
+  margin: auto;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: var(--entry-surface);
+  color: var(--entry-ink);
+  container-type: inline-size;
+  overscroll-behavior: contain;
+}
+#modal[data-kind="income"] {
+  --entry-hero: #4bae4f;
+  --entry-accent: #3c8b3f;
+  --entry-cancel: #b5efb7;
+  --entry-category: #8d39be;
+}
+html[data-theme="dark"] #modal:is([data-kind="income"],[data-kind="expense"]) {
+  --entry-surface: var(--surface);
+  --entry-ink: var(--ink);
+  --entry-muted: var(--muted);
+  --entry-divider: var(--line);
+  --entry-account: #6cc5ed;
+  --entry-category: #ff9ab1;
+}
+html[data-theme="dark"] #modal[data-kind="income"] { --entry-category: #d5a2fc }
+#modal:is([data-kind="income"],[data-kind="expense"]) > .dialog-header { display: none }
+#modal:is([data-kind="income"],[data-kind="expense"]) #form {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  padding: 0;
+}
+#modal:is([data-kind="income"],[data-kind="expense"]) #formFields { flex: 1 0 auto }
+#modal:is([data-kind="income"],[data-kind="expense"]) #form > .actions {
+  justify-content: center;
+  margin: 0;
+  padding: 4cqw 6.82cqw max(7.4dvh, calc(env(safe-area-inset-bottom) + 3cqw));
+}
+#modal:is([data-kind="income"],[data-kind="expense"]) #form > .actions > :not([type="submit"]) { display: none !important }
+#modal:is([data-kind="income"],[data-kind="expense"]) #form > .actions > [type="submit"] {
+  flex: 1 1 100%;
+  min-height: max(40px, 9.09cqw);
+  font-size: 3.64cqw;
+  font-weight: 400;
+  color: #fff;
+  background: var(--entry-accent);
+  box-shadow: 0 2cqw 3cqw rgba(26,27,35,.10);
+}
+.entry-hero {
+  min-height: 54.6cqw;
+  padding: max(14.1cqw, calc(env(safe-area-inset-top) + 1.5cqw)) 3.64cqw 9cqw;
+  background: var(--entry-hero);
+  color: white;
+}
+.entry-toolbar { position: relative; display: grid; justify-items: center; align-items: center }
+.entry-cancel {
+  position: absolute;
+  inset-inline-start: .8cqw;
+  min-height: 10cqw;
+  border: 1px solid var(--entry-accent);
+  border-radius: 100px;
+  background: var(--entry-cancel);
+  box-shadow: inset 0 0 1.2cqw #ffffff68;
+  color: #fff;
+  font-size: 3.8cqw;
+  padding: 0 3.6cqw;
+}
+.entry-dropdown {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+}
+.entry-dropdown select {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.entry-dropdown:focus-within { outline: 2px solid currentColor; outline-offset: 2px; border-radius: 100px }
+.entry-type {
+  min-height: 9.1cqw;
+  border-radius: 100px;
+  gap: 3.25cqw;
+  padding: 0 5.8cqw;
+  background: var(--entry-accent);
+  font-size: 3.94cqw;
+  font-weight: 700;
+}
+.entry-type svg, .entry-currency svg { width: 3.8cqw; height: 2.2cqw }
+.entry-value-label {
+  display: block;
+  margin: 6.7cqw 0 1.65cqw;
+  color: #fff;
+  font-size: 2.88cqw;
+  font-weight: 400;
+}
+.entry-value-line { display: flex; align-items: center; justify-content: space-between; gap: 1.8cqw }
+.entry-amount { position: relative; display: grid; flex: 1; min-width: 0 }
+.entry-amount input, .entry-amount output {
+  grid-area: 1/1;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-height: 7.5cqw;
+  color: #fff;
+  background: transparent;
+  font-size: 6.52cqw;
+  line-height: 1.12;
+  font-weight: 400;
+}
+.entry-amount input { opacity: 0; z-index: 1; cursor: text; appearance: textfield }
+.entry-amount input:focus { opacity: 1; outline: none }
+.entry-amount input:focus + output { visibility: hidden }
+.entry-amount input::-webkit-inner-spin-button { appearance: none }
+.entry-amount output { min-width: 0; overflow-wrap: anywhere }
+.entry-currency { color: #fff; gap: 1.8cqw; font-size: 2.9cqw; margin-right: .9cqw }
+.entry-currency > span, .entry-currency > svg { opacity: .72 }
+.entry-sheet {
+  position: relative;
+  margin-top: -5.7cqw;
+  padding: 2.1cqw 4.55cqw 0;
+  background: var(--entry-surface);
+  border-radius: 6.4cqw 6.4cqw 0 0;
+}
+.entry-row {
+  display: grid;
+  grid-template-columns: 4.77cqw minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 3.42cqw;
+  min-height: max(48px, 14.02cqw);
+  margin: 0;
+  padding: .6cqw 0;
+  border-bottom: max(1px, .2cqw) solid var(--entry-divider);
+  color: var(--entry-ink);
+  font-size: 3.2cqw;
+  font-weight: 400;
+}
+.entry-row > svg, .entry-row .entry-icon-button svg { width: 4.77cqw; height: 4.77cqw }
+.entry-row > .entry-trailing { color: #bdbdc1; width: 2.1cqw; height: 3.7cqw }
+.entry-icon-button {
+  display: grid; place-items: center;
+  width: max(32px, 4.77cqw);
+  min-height: 38px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+}
+.entry-icon-button[aria-pressed="true"] { color: var(--entry-accent) }
+.entry-icon-button[aria-pressed="true"] path { fill: currentColor }
+.entry-row input.entry-description {
+  min-height: 38px;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  background: transparent;
+  font-size: max(16px, 3.2cqw);
+}
+.entry-description::placeholder { color: var(--entry-muted); opacity: 1 }
+.entry-row .entry-capsule {
+  width: fit-content;
+  min-width: 5cqw;
+  min-height: 7.2cqw;
+  padding: 0 2.6cqw;
+  gap: 1.9cqw;
+  justify-self: start;
+  border: max(1px, .22cqw) solid var(--entry-choice);
+  border-radius: 100px;
+}
+.entry-capsule span:not(.bank-fallback) { min-width: 0; overflow-wrap: anywhere }
+.entry-category { --entry-choice: var(--entry-category) }
+.entry-account { --entry-choice: var(--entry-account) }
+.entry-capsule > svg, .entry-capsule .bank-icon { width: 3.65cqw; height: 3.65cqw; color: var(--entry-choice); flex: none }
+.entry-capsule .bank-icon { border-radius: 20%; background: transparent }
+.entry-toggle {
+  position: relative;
+  display: block;
+  width: 14.35cqw;
+  height: 6.35cqw;
+  border-radius: 100px;
+  background: var(--entry-muted);
+  cursor: pointer;
+}
+.entry-toggle:has(:checked) { background: var(--entry-accent) }
+.entry-toggle:focus-within { outline: 2px solid var(--entry-accent); outline-offset: 2px }
+.entry-toggle input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+.entry-toggle span {
+  position: absolute;
+  inset: .42cqw auto .42cqw .42cqw;
+  width: 8.4cqw;
+  border-radius: 100px;
+  background: #fff;
+  pointer-events: none;
+}
+.entry-toggle input:checked + span { inset-inline-start: auto; inset-inline-end: .42cqw }
+.entry-date-options { display: flex; gap: 2.72cqw; flex-wrap: wrap; align-items: center }
+.entry-date-options button {
+  min-height: 5.7cqw;
+  padding: .3cqw 2.3cqw;
+  border: 0;
+  border-radius: 100px;
+  color: var(--entry-muted);
+  background: var(--entry-divider);
+  font-size: 2.8cqw;
+}
+.entry-date-options button[aria-pressed="true"] { color: #fff; background: var(--entry-accent) }
+.entry-file { border: 0; border-bottom: max(1px, .2cqw) solid var(--entry-divider); width: 100%; background: transparent; text-align: left }
+.entry-file > span { overflow: hidden; white-space: nowrap; text-overflow: ellipsis }
+.entry-file > svg:last-child { margin-right: 2.55cqw; color: var(--entry-hero) }
+.entry-details {
+  border-bottom: max(1px, .2cqw) solid var(--entry-divider);
+  padding: 0 0 1px;
+}
+.entry-details summary {
+  display: grid;
+  place-items: center;
+  min-height: max(48px, 13.7cqw);
+  color: var(--entry-accent);
+  font-size: 3.15cqw;
+  cursor: pointer;
+  list-style: none;
+}
+.entry-details summary::-webkit-details-marker { display: none }
+.entry-details textarea {
+  width: 100%;
+  resize: vertical;
+  border: 1px solid var(--entry-divider);
+  background: var(--entry-surface);
+  color: inherit;
+  border-radius: 12px;
+  padding: 8px;
+  font: inherit;
+}
+.entry-details .actions { margin-bottom: 12px }
+.entry-capsule > span:first-child { display: grid; place-items: center; flex: none }
+.entry-capsule > span:first-child svg { width: 3.65cqw; height: 3.65cqw; color: var(--entry-choice) }
+#modal:is([data-kind="income"],[data-kind="expense"]) { overflow: auto }
 </style></head><body>
 
 <main>
@@ -680,7 +942,13 @@ function applyTheme(){const choice=localStorage.getItem(THEME_KEY)||'auto';const
 function setTheme(value){try{localStorage.setItem(THEME_KEY,value)}catch{}applyTheme()}
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',applyTheme);
 applyTheme();
-const KEY='minhas_financas_v1';const defaults={accounts:[],transactions:[],categories:[{name:'Salário',type:'income'},{name:'Atendimentos',type:'income'},{name:'Outras receitas',type:'income'},{name:'Alimentação',type:'expense'},{name:'Transporte',type:'expense'},{name:'Moradia',type:'expense'},{name:'Saúde',type:'expense'},{name:'Lazer',type:'expense'},{name:'Compras',type:'expense'},{name:'Outras despesas',type:'expense'}]};let db;try{db=JSON.parse(localStorage.getItem(KEY))||structuredClone(defaults)}catch{db=structuredClone(defaults)}if(!Array.isArray(db.weeklyBudgets))db.weeklyBudgets=[];let mode='',editing=null;const $=id=>document.getElementById(id),uid=()=>crypto.randomUUID?.()||String(Date.now()+Math.random()),today=()=>new Date().toLocaleDateString('en-CA'),monthNow=()=>today().slice(0,7),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),money=(n,c)=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:c,maximumFractionDigits:c==='PYG'?0:2}).format(n||0),save=()=>{try{localStorage.setItem(KEY,JSON.stringify(db))}catch{alert('No se pudo guardar. Comprueba el espacio de almacenamiento disponible.')}render()},toast=s=>{let t=$('toast');t.textContent=s;t.style.display='block';setTimeout(()=>t.style.display='none',2500)},account=id=>db.accounts.find(a=>a.id===id),balance=a=>Number(a.initial||0)+db.transactions.reduce((sum,t)=>sum+(t.accountId===a.id?(t.type==='income'?+t.amount:t.type==='expense'?-t.amount:t.type==='transfer'?-t.amount:0):0)+(t.toAccountId===a.id&&t.type==='transfer'?+t.amount:0),0),currencies=['PYG','BRL','USD'];
+const isRealized = transaction => transaction.type==='transfer'||transaction.realized!==false;
+const KEY='minhas_financas_v1';const defaults={accounts:[],transactions:[],categories:[{name:'Salário',type:'income'},{name:'Atendimentos',type:'income'},{name:'Outras receitas',type:'income'},{name:'Alimentação',type:'expense'},{name:'Transporte',type:'expense'},{name:'Moradia',type:'expense'},{name:'Saúde',type:'expense'},{name:'Lazer',type:'expense'},{name:'Compras',type:'expense'},{name:'Outras despesas',type:'expense'}]};let db;try{db=JSON.parse(localStorage.getItem(KEY))||structuredClone(defaults)}catch{db=structuredClone(defaults)}if(!Array.isArray(db.weeklyBudgets))db.weeklyBudgets=[];let mode='',editing=null;const $=id=>document.getElementById(id),uid=()=>crypto.randomUUID?.()||String(Date.now()+Math.random()),today=()=>new Date().toLocaleDateString('en-CA'),monthNow=()=>today().slice(0,7),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),money=(n,c)=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:c,maximumFractionDigits:c==='PYG'?0:2}).format(n||0),save=()=>{try{localStorage.setItem(KEY,JSON.stringify(db))}catch{alert('No se pudo guardar. Comprueba el espacio de almacenamiento disponible.')}render()},toast=s=>{let t=$('toast');t.textContent=s;t.style.display='block';setTimeout(()=>t.style.display='none',2500)},account=id=>db.accounts.find(a=>a.id===id),balance=a=>Number(a.initial||0)+db.transactions.reduce((sum,t)=>{
+ if(!isRealized(t))return sum;
+ const debit=t.accountId===a.id ? (t.type==='income'?+t.amount:t.type==='expense'||t.type==='transfer'?-t.amount:0) : 0;
+ const credit=t.toAccountId===a.id&&t.type==='transfer'?+t.amount:0;
+ return sum+debit+credit;
+},0),currencies=['PYG','BRL','USD'];
 const categoryLabels = {
  income: {'Salário':'Salario','Atendimentos':'Consultas','Outras receitas':'Otros ingresos'},
  expense: {'Alimentação':'Alimentación','Moradia':'Vivienda','Saúde':'Salud','Lazer':'Ocio','Outras despesas':'Otros gastos'},
@@ -774,7 +1042,7 @@ function selectedCurrency() {
 }
 function monthlyTotals(month,currency) {
  const accounts = db.accounts.filter(a=>a.currency===currency);
- const transactions = db.transactions.filter(t=>t.date.startsWith(month)&&account(t.accountId)?.currency===currency);
+ const transactions = db.transactions.filter(t=>isRealized(t)&&t.date.startsWith(month)&&account(t.accountId)?.currency===currency);
  const income = transactions.filter(t=>t.type==='income').reduce((sum,t)=>sum+t.amount,0);
  const expenses = transactions.filter(t=>t.type==='expense');
  return {
@@ -817,7 +1085,7 @@ function transactionRow(t) {
  const edit = t.type==='transfer'?'openTransfer':'openTransaction';
  const symbol = t.type==='transfer'?'⇄':t.type==='income'?'↑':'↓';
  const sign = t.type==='transfer'?'':t.type==='income'?'+':'−';
- return `<div class="row transaction-row"><span class="type-icon ${t.type}" aria-hidden="true">${symbol}</span><div class="transaction-text"><strong>${esc(label)}</strong><div class="muted">${esc(t.date)} · ${esc(a?.name||'Cuenta eliminada')}${t.description&&t.category?' · '+esc(categoryLabel(t.category,t.type)):''}</div></div><div class="right"><strong class="${t.type==='income'?'green':t.type==='expense'?'red':''}">${sign}${money(t.amount,currency)}</strong><button class="link-button" type="button" onclick="${edit}('${t.id}')">Editar</button></div></div>`;
+ return `<div class="row transaction-row"><span class="type-icon ${t.type}" aria-hidden="true">${symbol}</span><div class="transaction-text"><strong>${esc(label)}</strong>${t.favorite?'<span class="badge" aria-label="Favorito">♥</span>':''}${!isRealized(t)?'<span class="badge">Pendiente</span>':''}<div class="muted">${esc(t.date)} · ${esc(a?.name||'Cuenta eliminada')}${t.description&&t.category?' · '+esc(categoryLabel(t.category,t.type)):''}</div></div><div class="right"><strong class="${t.type==='income'?'green':t.type==='expense'?'red':''}">${sign}${money(t.amount,currency)}</strong><button class="link-button" type="button" onclick="${edit}('${t.id}')">Editar</button></div></div>`;
 }
 function render() {
  const month = monthInput.value || monthNow();
@@ -884,16 +1152,304 @@ function quickAction(type) {
  if (type==='transfer') openTransfer();
  else openTransaction(undefined,type);
 }
-function updateTransactionAppearance() {
- $('modal').dataset.kind = $('fType').value;
-}
 const opt=(items,selected)=>items.map(([v,l])=>`<option value="${esc(v)}" ${v===selected?'selected':''}>${esc(l)}</option>`).join('');const field=(label,id,type='text',value='',extra='')=>`<label for="${id}">${label}</label><input id="${id}" type="${type}" value="${esc(value)}" ${extra}>`;const select=(label,id,items,value)=>`<label for="${id}">${label}</label><select id="${id}">${opt(items,value)}</select>`;
-function startModal(title,formMode,id){mode=formMode;editing=id||null;$('modal').dataset.kind=formMode;$('modalTitle').textContent=title;$('deleteBtn').classList.toggle('hidden',!id);$('modal').showModal()}
+function startModal(title,formMode,id){mode=formMode;editing=id||null;$('modal').dataset.kind=formMode;$('modalTitle').textContent=title;$('deleteBtn').classList.toggle('hidden',!id);if(formMode!=='transaction')$('modal').showModal()}
 function openAccount(id){let a=account(id)||{};startModal(id?'Editar cuenta':'Nueva cuenta','account',id);$('formFields').innerHTML=field('Nombre de la cuenta','fName','text',a.name||'','required maxlength="60"')+select('Moneda','fCurrency',currencies.map(c=>[c,c]),a.currency||'PYG')+field('Saldo inicial','fInitial','number',a.initial??0,'step="0.01" required')+select('Banco / icono','fBank',BANKS,resolveBank(a))+'<div id="bankPreview" class="bank-preview"></div>';$('fBank').onchange=bankPreview;bankPreview();if(id){$('fCurrency').disabled=true;$('fInitial').disabled=db.transactions.some(t=>t.accountId===id||t.toAccountId===id)}}
-function openTransaction(id,defaultType='expense',defaultAccountId){if(!db.accounts.length){toast('Primero registra una cuenta');show('contas');return}let t=db.transactions.find(x=>x.id===id)||{};startModal(id?'Editar movimiento':'Nuevo movimiento','transaction',id);$('formFields').innerHTML=select('Tipo','fType',[['expense','Gasto'],['income','Ingreso']],t.type||defaultType)+select('Cuenta','fAccount',db.accounts.map(a=>[a.id,a.name+' · '+a.currency]),t.accountId||account(defaultAccountId)?.id||db.accounts[0].id)+field('Importe','fAmount','number',t.amount||'','min="0.01" step="0.01" required')+field('Fecha','fDate','date',t.date||today(),'required')+field('Descripción','fDescription','text',t.description||'','maxlength="100"')+'<div id="catContainer"></div>';$('fType').onchange=()=>{updateTransactionAppearance();renderCategory()};updateTransactionAppearance();$('fAccount').onchange=renderCategory;renderCategory(t.category)}
-function renderCategory(current){const type=$('fType').value;const cats=db.categories.filter(x=>x.type===type).map(x=>[x.name,categoryLabel(x.name,x.type)]);$('catContainer').innerHTML=select('Categoría','fCategory',cats,current||cats[0]?.[0]);}
+const entryIconPaths = {
+ down:'<path d="m3 8 9 8 9-8"/>',
+ right:'<path d="m8 3 9 9-9 9"/>',
+ check:'<path d="M22 11v1a10 10 0 1 1-6-9.2M8 11l3.2 3.2L22 3.5"/>',
+ date:'<rect x="1" y="3.5" width="22" height="19" rx="3"/><path d="M7 1.8v4M17 1.8v4M7 12.5l3.5 3.5 6-6.5"/>',
+ pencil:'<path d="m3 21 1.8-6L17.2 2.6a2.7 2.7 0 0 1 3.8 3.8L8.6 18.8 3 21zM15 5l4 4"/>',
+ heart:'<path d="M12 22 2.7 12.6a6.1 6.1 0 0 1 8.6-8.6l.7.7.7-.7a6.1 6.1 0 0 1 8.6 8.6L12 22z"/>',
+ category:'<path d="M5 1h14a2 2 0 0 1 2 2v20l-9-5.5L3 23V3a2 2 0 0 1 2-2zm2.5 9h9"/>',
+ categoryIncome:'<path d="M4 3v13c0 2 3.5 4 8 5 4.5-1 8-3 8-5V3m-8 3 1.2 2.7 2.8.3-2.1 2 .5 2.8-2.4-1.5-2.4 1.5.5-2.8-2.1-2 2.8-.3z"/>',
+ categoryExpense:'<path d="M3 2l4 4m-6-2 4 4m0-8 4 4m-8 0 4 4a3 3 0 0 0 4.2-4.2M7 7l15 15M4 22 16 10m0 0c-2-2-1-4.4.9-6.3 1.9-1.9 4-2.6 5.3-1.3s.6 3.4-1.3 5.3c-1.9 1.9-4.1 3-4.9 2.3z"/>',
+ wallet:'<path d="M1 7V4.8A3.8 3.8 0 0 1 4.8 1h8.4A3.8 3.8 0 0 1 17 4.8V6M4.8 6H19a4 4 0 0 1 4 4v8a4 4 0 0 1-4 4H1V9.8A3.8 3.8 0 0 1 4.8 6Z"/><circle cx="16" cy="14" r=".7"/>',
+ cash:'<rect x="1" y="5" width="22" height="14" rx="2.5"/><path d="M12 7.5v9m2.4-7h-3.6a1.5 1.5 0 0 0 0 3h2.4a1.5 1.5 0 0 1 0 3H9"/>',
+ attachment:'<rect x="1.5" y="1.5" width="21" height="21" rx="5"/><path d="m5.5 16 4-5 3.5 4 2.5-2 3 2.5"/><circle cx="17.8" cy="6.3" r=".65"/>',
+ upload:'<path d="M9 19H6a5.5 5.5 0 0 1-1-10.9A6.1 6.1 0 0 1 17 9a5 5 0 0 1 1 10h-3m-3 4V9m-4 4 4-4 4 4"/>'
+};
+function entryIcon(name,className='') {
+ return `<svg class="${className}" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">${entryIconPaths[name]}</svg>`;
+}
+
+const attachmentMaxBytes = 512 * 1024;
+const attachmentBase64Limit = Math.ceil(attachmentMaxBytes/3)*4;
+let entryDraft;
+
+function openTransaction(id,defaultType='expense',defaultAccountId) {
+ if(!db.accounts.length){toast('Primero registra una cuenta');show('contas');return}
+ const t = db.transactions.find(x=>x.id===id)||{};
+ const activeAccount = account(t.accountId)||account(defaultAccountId)||
+  db.accounts.find(a=>a.currency===selectedCurrency())||db.accounts[0];
+ const enabledCurrencies = currencies.filter(code=>db.accounts.some(a=>a.currency===code));
+ entryDraft = {favorite:t.favorite===true,attachment:t.attachment||null,reading:false};
+
+ startModal(id?'Editar movimiento':'Nuevo movimiento','transaction',id);
+ $('formFields').innerHTML = `
+  <div class="entry-hero">
+   <div class="entry-toolbar">
+    <button class="entry-cancel" type="button" onclick="$('modal').close()">Cancelar</button>
+    <div class="entry-dropdown entry-type">
+     <span id="entryTypeText"></span>${entryIcon('down')}
+     <select id="fType" aria-label="Tipo de movimiento">${opt([['expense','Gasto'],['income','Ingreso']],t.type||defaultType)}</select>
+    </div>
+   </div>
+   <label id="entryValueLabel" class="entry-value-label" for="fAmount"></label>
+   <div class="entry-value-line">
+    <div class="entry-amount">
+     <input id="fAmount" type="number" inputmode="decimal" min="0.01" step="0.01" required value="${esc(t.amount||'')}">
+     <output id="entryAmountText" for="fAmount" aria-hidden="true"></output>
+    </div>
+    <div class="entry-dropdown entry-currency">
+     <span id="entryCurrencyText"></span>${entryIcon('down')}
+     <select id="fCurrency" aria-label="Moneda">${opt(enabledCurrencies.map(code=>[code,code]),activeAccount.currency)}</select>
+    </div>
+   </div>
+  </div>
+  <div class="entry-sheet">
+   <label class="entry-row">
+    ${entryIcon('check')}<span>Realizado</span>
+    <span class="entry-toggle"><input id="fRealized" type="checkbox" role="switch" ${t.realized===false?'':'checked'}><span aria-hidden="true"></span></span>
+   </label>
+   <div class="entry-row">
+    ${entryIcon('date')}
+    <div class="entry-date-options">
+     <button type="button" data-entry-date="today" onclick="chooseEntryDate('today')">Hoy</button>
+     <button type="button" data-entry-date="yesterday" onclick="chooseEntryDate('yesterday')">Ayer</button>
+     <button type="button" data-entry-date="other" onclick="chooseEntryDate('other')">Otros</button>
+     <input id="fDate" class="hidden" type="date" aria-label="Fecha del movimiento" value="${esc(t.date||today())}" required>
+    </div>
+   </div>
+   <div class="entry-row">
+    ${entryIcon('pencil')}
+    <input id="fDescription" class="entry-description" type="text" aria-label="Descripción" placeholder="Descripción" maxlength="100" value="${esc(t.description||'')}">
+    <button id="entryFavorite" class="entry-icon-button" type="button" aria-label="Favorito" aria-pressed="${entryDraft.favorite}" onclick="toggleEntryFavorite()">${entryIcon('heart')}</button>
+   </div>
+   <div class="entry-row">
+    ${entryIcon('category')}
+    <div class="entry-dropdown entry-capsule entry-category">
+     <span id="entryCategoryIcon"></span><span id="entryCategoryText"></span>
+     <select id="fCategory" aria-label="Categoría"></select>
+    </div>
+    ${entryIcon('right','entry-trailing')}
+   </div>
+   <div class="entry-row">
+    ${entryIcon('wallet')}
+    <div class="entry-dropdown entry-capsule entry-account">
+     <span id="entryAccountIcon"></span><span id="entryAccountText"></span>
+     <select id="fAccount" aria-label="Cuenta" required></select>
+    </div>
+    ${entryIcon('right','entry-trailing')}
+   </div>
+   <button class="entry-row entry-file" type="button" onclick="$('entryFileInput').click()">
+    ${entryIcon('attachment')}<span id="entryAttachmentName">Adjuntar archivo</span>${entryIcon('upload')}
+   </button>
+   <input id="entryFileInput" class="hidden" type="file" onchange="readEntryAttachment(event)">
+   <details class="entry-details">
+    <summary>Más detalles</summary>
+    <label for="fNotes">Notas</label>
+    <textarea id="fNotes" rows="3" maxlength="500">${esc(t.notes||'')}</textarea>
+    <div class="actions">
+     <button id="entryDownload" class="btn secondary hidden" type="button" onclick="downloadEntryAttachment()">Descargar archivo</button>
+     <button id="entryRemoveFile" class="btn secondary hidden" type="button" onclick="clearEntryAttachment()">Quitar archivo</button>
+     ${id?'<button class="btn danger" type="button" onclick="deleteCurrent()">Eliminar movimiento</button>':''}
+    </div>
+   </details>
+  </div>`;
+
+ $('fType').onchange=()=>{updateTransactionAppearance();renderCategory()};
+ $('fAmount').oninput=updateEntryAmount;
+ $('fCurrency').onchange=()=>updateEntryAccounts();
+ $('fAccount').onchange=updateEntryAccountLabel;
+ $('fCategory').onchange=updateEntryCategoryLabel;
+ $('fDate').onchange=()=>updateEntryDate();
+ updateEntryAccounts(activeAccount.id);
+ updateEntryDate();
+ updateTransactionAppearance();
+ renderCategory(t.category);
+ updateEntryAttachment();
+ $('modal').showModal();
+}
+
+function updateTransactionAppearance() {
+ const type = $('fType').value;
+ $('modal').dataset.kind = type;
+ $('entryTypeText').textContent = typeLabels[type];
+ $('entryValueLabel').textContent = type==='income'?'Valor de los ingresos':'Valor del gasto';
+}
+function updateEntryAmount() {
+ const currency = $('fCurrency').value;
+ $('entryCurrencyText').textContent = currency;
+ $('entryAmountText').textContent = overviewAmount(Number($('fAmount').value),currency);
+}
+function updateEntryAccounts(preferredId) {
+ const list = db.accounts.filter(a=>a.currency===$('fCurrency').value);
+ $('fAccount').innerHTML = opt(list.map(a=>[a.id,a.name]),preferredId||list[0]?.id);
+ updateEntryAccountLabel();
+ updateEntryAmount();
+}
+function updateEntryAccountLabel() {
+ const a = account($('fAccount').value);
+ $('entryAccountIcon').innerHTML = a&&resolveBank(a)?bankIcon(a):entryIcon('cash');
+ $('entryAccountText').textContent = a?.name||'Seleccionar cuenta';
+}
+function renderCategory(current) {
+ const type = $('fType').value;
+ const categories = db.categories.filter(item=>item.type===type).map(item=>[item.name,categoryLabel(item.name,item.type)]);
+ if(current&&!categories.some(([name])=>name===current)) categories.push([current,categoryLabel(current,type)]);
+ $('fCategory').innerHTML = opt(categories.length?categories:[['','Sin categoría']],current||categories[0]?.[0]);
+ updateEntryCategoryLabel();
+}
+function updateEntryCategoryLabel() {
+ const type = $('fType').value;
+ $('entryCategoryIcon').innerHTML = entryIcon(type==='income'?'categoryIncome':'categoryExpense');
+ $('entryCategoryText').textContent = categoryLabel($('fCategory').value,type)||'Sin categoría';
+}
+function yesterdayDate() {
+ const date = new Date();
+ date.setDate(date.getDate()-1);
+ return date.toLocaleDateString('en-CA');
+}
+function updateEntryDate(forceOther=false) {
+ const date = $('fDate');
+ const key = forceOther?'other':date.value===today()?'today':date.value===yesterdayDate()?'yesterday':'other';
+ date.classList.toggle('hidden',key!=='other');
+ document.querySelectorAll('[data-entry-date]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.entryDate===key)));
+}
+function chooseEntryDate(key) {
+ const date = $('fDate');
+ if(key!=='other'){
+  date.value=key==='today'?today():yesterdayDate();
+  updateEntryDate();
+  return;
+ }
+ updateEntryDate(true);
+ date.focus();
+ try { date.showPicker?.() } catch {}
+}
+function toggleEntryFavorite() {
+ entryDraft.favorite = !entryDraft.favorite;
+ $('entryFavorite').setAttribute('aria-pressed',String(entryDraft.favorite));
+}
+
+function updateEntryAttachment() {
+ const file = entryDraft.attachment;
+ $('entryAttachmentName').textContent = entryDraft.reading?'Leyendo archivo…':file?.name||'Adjuntar archivo';
+ $('entryDownload').classList.toggle('hidden',!file||entryDraft.reading);
+ $('entryRemoveFile').classList.toggle('hidden',!file||entryDraft.reading);
+}
+function readEntryAttachment(event) {
+ const input = event.target;
+ const file = input.files[0];
+ if(!file)return;
+ input.value='';
+ if(file.size>attachmentMaxBytes){alert('El archivo debe pesar como máximo 512 KB.');return}
+ if(entryDraft.reading)return;
+ const draft = entryDraft;
+ draft.reading=true;
+ updateEntryAttachment();
+ const reader = new FileReader();
+ reader.onloadend=()=>{
+  if(entryDraft!==draft||!$('modal').open)return;
+  draft.reading=false;
+  if(typeof reader.result==='string'){
+   draft.attachment={name:file.name.slice(0,240),base64:reader.result.split(',')[1]};
+  }else{
+   alert('No se pudo leer el archivo.');
+  }
+  updateEntryAttachment();
+ };
+ reader.readAsDataURL(file);
+}
+function clearEntryAttachment() {
+ entryDraft.attachment=null;
+ updateEntryAttachment();
+}
+function downloadEntryAttachment() {
+ const file = entryDraft.attachment;
+ if(!file||typeof file.base64!=='string'||file.base64.length>attachmentBase64Limit)return;
+ try {
+  const bytes=Uint8Array.from(atob(file.base64),ch=>ch.charCodeAt(0));
+  const url=URL.createObjectURL(new Blob([bytes],{type:'application/octet-stream'}));
+  const link=document.createElement('a');
+  link.href=url;
+  link.download=String(file.name||'adjunto');
+  link.click();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+ } catch { alert('No se pudo descargar el archivo.'); }
+}
+
+function saveEntry() {
+ if(entryDraft.reading){alert('Espera a que termine de cargarse el archivo.');return}
+ const amount=Number($('fAmount').value);
+ const accountId=$('fAccount').value;
+ const date=$('fDate').value;
+ const type=$('fType').value;
+ if(!Number.isFinite(amount)||amount<=0){alert('Ingresa un importe válido.');return}
+ if(!date||!account(accountId)||!['income','expense'].includes(type))return;
+ const original=db.transactions.find(t=>t.id===editing);
+ const transaction={
+  ...original, id:editing||uid(), type, accountId, amount, date,
+  category:$('fCategory').value, description:$('fDescription').value.trim(),
+  created:original?.created||new Date().toISOString()
+ };
+ const fields={
+  realized:$('fRealized').checked?undefined:false,
+  favorite:entryDraft.favorite||undefined,
+  attachment:entryDraft.attachment||undefined,
+  notes:$('fNotes').value.trim()||undefined
+ };
+ for(const [key,value] of Object.entries(fields)){
+  if(value===undefined)delete transaction[key];
+  else transaction[key]=value;
+ }
+ const transactions=original?db.transactions.map(t=>t.id===editing?transaction:t):[...db.transactions,transaction];
+ const next={...db,transactions};
+ try {
+  localStorage.setItem(KEY,JSON.stringify(next));
+ } catch {
+  alert('No se pudo guardar. Comprueba el espacio de almacenamiento disponible.');
+  return;
+ }
+ db=next;
+ $('modal').close();
+ render();
+ toast('Guardado correctamente');
+}
+
 function openTransfer(id){if(db.accounts.length<2){toast('Primero registra dos cuentas');return}let t=db.transactions.find(x=>x.id===id)||{};startModal(id?'Editar transferencia':'Nueva transferencia','transfer',id);$('formFields').innerHTML=select('Cuenta de origen','fAccount',db.accounts.map(a=>[a.id,a.name+' · '+a.currency]),t.accountId||db.accounts[0].id)+select('Cuenta de destino','fTo',db.accounts.map(a=>[a.id,a.name+' · '+a.currency]),t.toAccountId||db.accounts[1].id)+field('Importe','fAmount','number',t.amount||'','min="0.01" step="0.01" required')+field('Fecha','fDate','date',t.date||today(),'required')}
-function saveForm(e){e.preventDefault();const v=id=>$(id).value;let obj;if(mode==='account'){const name=v('fName').trim();if(!name)return;obj={id:editing||uid(),name,currency:editing?account(editing).currency:v('fCurrency'),initial:editing&&$('fInitial').disabled?account(editing).initial:Number(v('fInitial')),bank:v('fBank')};if(editing)db.accounts=db.accounts.map(a=>a.id===editing?obj:a);else db.accounts.push(obj)}else{const amount=Number(v('fAmount')),accountId=v('fAccount'),date=v('fDate');if(!Number.isFinite(amount)||amount<=0)return alert('Ingresa un importe válido.');if(mode==='transfer'){const toAccountId=v('fTo');if(accountId===toAccountId)return alert('Selecciona cuentas distintas.');if(account(accountId)?.currency!==account(toAccountId)?.currency)return alert('Las transferencias requieren cuentas de la misma moneda.');obj={id:editing||uid(),type:'transfer',accountId,toAccountId,amount,date,category:'Transferência',description:'',created:db.transactions.find(t=>t.id===editing)?.created||new Date().toISOString()}}else{obj={id:editing||uid(),type:v('fType'),accountId,amount,date,category:v('fCategory'),description:v('fDescription').trim(),created:db.transactions.find(t=>t.id===editing)?.created||new Date().toISOString()}}if(editing)db.transactions=db.transactions.map(t=>t.id===editing?obj:t);else db.transactions.push(obj)}$('modal').close();save();toast('Guardado correctamente')}
+function saveForm(e){
+ e.preventDefault();
+ if(mode==='transaction'){saveEntry();return}
+ const value=id=>$(id).value;
+ if(mode==='account'){
+  const name=value('fName').trim();
+  if(!name)return;
+  const item={
+   id:editing||uid(),name,currency:editing?account(editing).currency:value('fCurrency'),
+   initial:editing&&$('fInitial').disabled?account(editing).initial:Number(value('fInitial')),bank:value('fBank')
+  };
+  if(editing)db.accounts=db.accounts.map(a=>a.id===editing?item:a);
+  else db.accounts.push(item);
+ }else{
+  const amount=Number(value('fAmount')),accountId=value('fAccount'),toAccountId=value('fTo');
+  if(!Number.isFinite(amount)||amount<=0)return alert('Ingresa un importe válido.');
+  if(accountId===toAccountId)return alert('Selecciona cuentas distintas.');
+  if(account(accountId)?.currency!==account(toAccountId)?.currency)return alert('Las transferencias requieren cuentas de la misma moneda.');
+  const item={
+   id:editing||uid(),type:'transfer',accountId,toAccountId,amount,date:value('fDate'),
+   category:'Transferência',description:'',
+   created:db.transactions.find(t=>t.id===editing)?.created||new Date().toISOString()
+  };
+  if(editing)db.transactions=db.transactions.map(t=>t.id===editing?item:t);
+  else db.transactions.push(item);
+ }
+ $('modal').close();
+ save();
+ toast('Guardado correctamente');
+}
 function deleteCurrent(){if(!editing||!confirm('¿Eliminar este registro?'))return;if(mode==='account'){if(db.transactions.some(t=>t.accountId===editing||t.toAccountId===editing))return alert('Primero elimina los movimientos de esta cuenta.');db.accounts=db.accounts.filter(a=>a.id!==editing)}else db.transactions=db.transactions.filter(t=>t.id!==editing);$('modal').close();save();toast('Registro eliminado')}
 function addCategory(){let name=$('newCategory').value.trim(),type=$('newCategoryType').value;if(!name)return;if(db.categories.some(c=>c.name.toLowerCase()===name.toLowerCase()&&c.type===type))return toast('La categoría ya existe');db.categories.push({name,type});$('newCategory').value='';save()}
 function removeCategory(name,type){name=decodeURIComponent(name);if(db.transactions.some(t=>t.category===name&&t.type===type))return alert('Esta categoría está en uso.');if(confirm('¿Eliminar la categoría?')){db.categories=db.categories.filter(c=>!(c.name===name&&c.type===type));save()}}
@@ -956,23 +1512,16 @@ function preencherDespesaDoAtalho(q){
  const amount=Number(raw.includes(',')?raw.replace(/\./g,'').replace(',','.'):raw);
  if(!Number.isFinite(amount)||amount<=0){alert('El atajo no envió un importe válido.');return;}
  if(!db.accounts.length){alert('Registra una cuenta antes de usar el atajo.');return;}
- openTransaction();
- $('fType').value='expense';
- updateTransactionAppearance();
  const requested=(q.get('conta')||'').trim().toLocaleLowerCase('pt-BR');
- if(requested){
-  const found=db.accounts.find(a=>a.name.trim().toLocaleLowerCase('pt-BR')===requested)
-    ||db.accounts.find(a=>a.name.toLocaleLowerCase('pt-BR').includes(requested));
-  if(found)$('fAccount').value=found.id;
- }
+ const found=requested&&(db.accounts.find(a=>a.name.trim().toLocaleLowerCase('pt-BR')===requested)
+  ||db.accounts.find(a=>a.name.toLocaleLowerCase('pt-BR').includes(requested)));
+ openTransaction(undefined,'expense',found?.id);
  $('fAmount').value=String(amount);
  $('fDescription').value=(q.get('descricao')||'').slice(0,100);
- renderCategory();
- const category = q.get('categoria');
- if(category){
-  const match = findExpenseCategory(category);
-  if(match)$('fCategory').value=match.name;
- }
+ updateEntryAmount();
+ const category=q.get('categoria');
+ const matchedCategory=category&&findExpenseCategory(category);
+ if(matchedCategory)renderCategory(matchedCategory.name);
  // Exigir confirmação explícita no formulário existente.
 }
 async function importarDespesaCopiada(){
