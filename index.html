@@ -1263,6 +1263,32 @@ html:not([data-section="resumenDetalle"]) .detail-add { display: none }
   border-radius: inherit; background: transparent; cursor: pointer;
 }
 .home-summary-card:has(.home-summary-open:active) { transform: scale(.98) }
+.home-accounts-heading .account-order-toggle {
+  right: max(49px,10cqw);
+  width: auto;
+  height: auto;
+  min-height: 37px;
+  padding: 0 7px;
+  color: var(--account-action);
+  font-size: max(11px,2.95cqw);
+  font-weight: 400;
+}
+.home-accounts-heading .account-order-toggle[hidden], .detail-order-bar[hidden] { display: none }
+.detail-order-bar { display: flex; justify-content: end; margin: 0 0 1.8cqw }
+.detail-order-bar button {
+  border: 0; border-radius: 99px; padding: 8px 12px; min-height: 38px;
+  background: var(--surface); color: var(--detail-ink);
+  font: inherit; font-size: max(12px,3cqw);
+}
+.home-account-row.ordering, .detail-account.ordering { grid-template-columns: minmax(0,1fr) auto }
+.detail-account.ordering { grid-template-columns: 11.4cqw minmax(0,1fr) auto }
+.account-order-controls { display: flex; align-items: center; justify-content: end; gap: 5px }
+.account-order-controls button {
+  display: grid; place-items: center; min-width: 37px; min-height: 37px; padding: 0;
+  border: 1px solid var(--line); border-radius: 10px; background: var(--soft);
+  color: var(--accent); font: inherit; font-size: 18px; cursor: pointer;
+}
+.account-order-controls button:disabled { opacity: .32; cursor: default }
 </style></head><body>
 
 <main>
@@ -1304,6 +1330,7 @@ html:not([data-section="resumenDetalle"]) .detail-add { display: none }
     <section class="home-accounts" aria-labelledby="home-accounts-title">
       <div class="home-accounts-heading">
         <h2 id="home-accounts-title">Cuentas</h2>
+        <button id="homeOrderAccounts" class="account-order-toggle" type="button" aria-controls="homeAccounts" aria-pressed="false" onclick="toggleAccountOrdering()">Reordenar</button>
         <button type="button" onclick="show('contas')" aria-label="Ver todas las cuentas">
           <svg viewBox="0 0 60 60" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.8"><rect x="2.5" y="2.5" width="22" height="55" rx="2.5"/><rect x="35.5" y="2.5" width="22" height="55" rx="2.5"/></svg>
         </button>
@@ -1346,6 +1373,7 @@ html:not([data-section="resumenDetalle"]) .detail-add { display: none }
     </div>
   </header>
   <div class="detail-content">
+    <div id="detailOrderBar" class="detail-order-bar" hidden><button id="detailOrderAccounts" type="button" aria-controls="detailItems" aria-pressed="false" onclick="toggleAccountOrdering()">Reordenar</button></div>
     <div id="detailItems"></div>
     <div id="detailSort" class="detail-sort hidden"><button id="detailSortButton" type="button" onclick="toggleDetailOptions()"></button></div>
   </div>
@@ -1759,17 +1787,20 @@ function backFromHomeDetail() {
  window.scrollTo(0,summaryScrollTop);
 }
 function toggleDetailSearch() {
+ if(accountOrdering){accountOrdering=false;render()}
  const hidden=$('detailSearchRow').classList.toggle('hidden');
  $('detailSearchButton').setAttribute('aria-expanded',String(!hidden));
  if(!hidden)$('detailSearch').focus();
  else{$('detailSearch').value='';render()}
 }
 function toggleDetailOptions() {
+ if(accountOrdering){accountOrdering=false;render()}
  const hidden=$('detailOptions').classList.toggle('hidden');
  $('detailMore').setAttribute('aria-expanded',String(!hidden));
  if(!hidden)$('detailOrder').focus();
 }
 function showSummaryStatement(id='') {
+ accountOrdering=false;
  detailStatementAccount=id;
  $('detailSearch').value='';
  render();
@@ -1800,17 +1831,84 @@ function addFromHomeDetail() {
 function detailAmount(amount,currency) {
  return overviewAmountsHidden?'••••••':overviewAmount(amount,currency).replace(/ gs$/,' Gs');
 }
-function detailAccountRow(a) {
+let accountOrdering = false;
+
+function orderedAccounts() {
+ const saved=Array.isArray(db.accountOrder)?db.accountOrder:[];
+ const byId=new Map(db.accounts.map(a=>[String(a.id),a]));
+ const ordered=[];
+ for(const id of saved){
+  if(!byId.has(id))continue;
+  ordered.push(byId.get(id));
+  byId.delete(id);
+ }
+ return ordered.concat([...byId.values()]);
+}
+function visibleOrderedAccounts() {
+ const accounts=orderedAccounts();
+ return selectedBalanceView()==='TOTAL'?accounts:accounts.filter(a=>a.currency===selectedCurrency());
+}
+function toggleAccountOrdering() {
+ accountOrdering=!accountOrdering;
+ if(accountOrdering&&document.documentElement.dataset.section==='resumenDetalle'){
+  $('detailOrder').value='recent';
+  $('detailSearch').value='';
+  $('detailSearchRow').classList.toggle('hidden',true);
+  $('detailSearchButton').setAttribute('aria-expanded','false');
+  $('detailOptions').classList.toggle('hidden',true);
+  $('detailMore').setAttribute('aria-expanded','false');
+ }
+ render();
+}
+function renderAccountOrderingButton(button,count) {
+ button.hidden=count<2&&!accountOrdering;
+ button.textContent=accountOrdering?'Listo':'Reordenar';
+ button.setAttribute('aria-pressed',String(accountOrdering));
+}
+function accountOrderControls(a,index,count) {
  const id=esc(JSON.stringify(String(a.id)));
  const name=esc(a.name);
- return `<article class="detail-account">
+ return `<div class="account-order-controls" aria-label="Posición ${index+1} de ${count}">
+  <button type="button" data-order-account="${esc(a.id)}" data-order-step="-1" aria-label="Subir ${name}" ${index===0?'disabled':''} onclick="moveAccount(${id},-1)">↑</button>
+  <button type="button" data-order-account="${esc(a.id)}" data-order-step="1" aria-label="Bajar ${name}" ${index===count-1?'disabled':''} onclick="moveAccount(${id},1)">↓</button>
+ </div>`;
+}
+function moveAccount(id,direction) {
+ if(!accountOrdering||(direction!==-1&&direction!==1))return;
+ const visible=visibleOrderedAccounts();
+ const index=visible.findIndex(a=>String(a.id)===id);
+ const neighbor=visible[index+direction];
+ if(index<0||!neighbor)return;
+
+ const order=orderedAccounts().map(a=>String(a.id));
+ const first=order.indexOf(id);
+ const second=order.indexOf(String(neighbor.id));
+ [order[first],order[second]]=[order[second],order[first]];
+ const next={...db,accountOrder:order};
+ try {
+  localStorage.setItem(KEY,JSON.stringify(next));
+ } catch {
+  toast('No se pudo guardar el orden');
+  return;
+ }
+ db=next;
+ render();
+ const container=$(document.documentElement.dataset.section==='resumenDetalle'?'detailItems':'homeAccounts');
+ const buttons=Array.from(container.querySelectorAll('[data-order-account]:not(:disabled)')).filter(b=>b.dataset.orderAccount===id);
+ (buttons.find(b=>Number(b.dataset.orderStep)===direction)||buttons[0])?.focus({preventScroll:true});
+}
+
+function detailAccountRow(a,index,count) {
+ const id=esc(JSON.stringify(String(a.id)));
+ const name=esc(a.name);
+ return `<article class="detail-account${accountOrdering?' ordering':''}">
   ${bankIcon(a)}
   <div class="detail-name">${name}<span class="detail-subtext">${esc(a.currency)}</span></div>
   <div class="detail-account-value">
-   <div class="detail-account-actions">
+   ${accountOrdering?accountOrderControls(a,index,count):`<div class="detail-account-actions">
     <button class="detail-button" type="button" aria-label="Movimientos de ${name}" onclick="showSummaryStatement(${id})">${detailIcon('list')}</button>
     <button class="detail-button" type="button" aria-label="Editar cuenta ${name}" onclick="openAccount(${id})">${detailIcon('more')}</button>
-   </div>
+   </div>`}
    <span class="detail-amount">${detailAmount(balance(a),a.currency)}</span>
   </div>
  </article>`;
@@ -1848,7 +1946,9 @@ function renderHomeDetail(month,sorted,currency,overview,visibleAccounts) {
  $('detailTitle').textContent=title;
  $('detailTotal').textContent=totalLabel+(overview.partial&&!statementAccount?' · parcial':'');
  $('detailAdd').setAttribute('aria-label',accountsPage?'Añadir cuenta':detailKind==='income'?'Añadir ingreso':'Añadir gasto');
- $('detailSort').classList.toggle('hidden',!accountsPage);
+ $('detailSort').classList.toggle('hidden',!accountsPage||accountOrdering);
+ $('detailOrderBar').hidden=!accountsPage||visibleAccounts.length<2;
+ renderAccountOrderingButton($('detailOrderAccounts'),visibleAccounts.length);
 
  const needle=normalizeDetailText($('detailSearch').value);
  const order=$('detailOrder').value;
@@ -1859,7 +1959,7 @@ function renderHomeDetail(month,sorted,currency,overview,visibleAccounts) {
   const accounts=visibleAccounts.filter(a=>matchesText(a.name,a.currency));
   if(order==='name')accounts.sort((a,b)=>a.name.localeCompare(b.name,'es'));
   if(order==='amount')accounts.sort((a,b)=>a.currency.localeCompare(b.currency)||balance(b)-balance(a));
-  html=accounts.map(detailAccountRow).join('');
+  html=accounts.map((a,index)=>detailAccountRow(a,index,accounts.length)).join('');
  }else{
   const rows=sorted.filter(t=>{
    const from=account(t.accountId);
@@ -1887,18 +1987,18 @@ function categoryBreakdown(totals,currency) {
   `<div class="breakdown-row"><div class="topline"><span>${esc(categoryLabel(name,'expense')||'Sin categoría')}</span><strong>${money(amount,currency)}</strong></div><div class="bar"><div class="fill" style="width:${totals.expense?amount/totals.expense*100:0}%"></div></div></div>`
  ).join('');
 }
-function homeAccountRow(a) {
+function homeAccountRow(a,index,count) {
  const amount = balance(a);
  const id = esc(JSON.stringify(String(a.id)));
  const name = esc(a.name);
  const icon = resolveBank(a)?bankIcon(a):`<svg class="wallet-icon" viewBox="0 0 90 90" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="17" width="86" height="56" rx="12"/><path d="M45 27v35m9-26H42a5 5 0 0 0 0 10h6a5 5 0 0 1 0 10H35"/></svg>`;
- return `<div class="home-account-row">
+ return `<div class="home-account-row${accountOrdering?' ordering':''}">
   <button class="home-account-identity" type="button" aria-label="Editar cuenta: ${name}" onclick="openAccount(${id})">
    ${icon}<span class="home-account-text"><span>${name}</span><span class="${amount<0?'negative':''}">${overviewAmount(amount,a.currency)}</span></span>
   </button>
-  <button class="home-account-add-movement" type="button" aria-label="Añadir movimiento en ${name}" onclick="openTransaction(undefined,'expense',${id})">
+  ${accountOrdering?accountOrderControls(a,index,count):`<button class="home-account-add-movement" type="button" aria-label="Añadir movimiento en ${name}" onclick="openTransaction(undefined,'expense',${id})">
    <svg viewBox="0 0 54 54" aria-hidden="true"><path d="M27 4v46M5 27h44" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round"/></svg>
-  </button>
+  </button>`}
  </div>`;
 }
 function accountRow(a) {
@@ -2156,8 +2256,9 @@ function render() {
  renderOverview(overview,currency);
  renderHomeSummary(month,currency,overview,allCurrencies);
 
- const visibleAccounts=allCurrencies?db.accounts:db.accounts.filter(a=>a.currency===currency);
- $('homeAccounts').innerHTML=visibleAccounts.length?visibleAccounts.map(homeAccountRow).join('')
+ const visibleAccounts=visibleOrderedAccounts();
+ renderAccountOrderingButton($('homeOrderAccounts'),visibleAccounts.length);
+ $('homeAccounts').innerHTML=visibleAccounts.length?visibleAccounts.map((a,index)=>homeAccountRow(a,index,visibleAccounts.length)).join('')
   :`<div class="empty">${allCurrencies?'No hay cuentas registradas.':`No hay cuentas en ${currency}.`}</div>`;
  $('homeAddAccount').classList.toggle('hidden',visibleAccounts.length>0);
  const totalLabel=overview.partial?'Total parcial en guaraníes':allCurrencies?'Total en guaraníes':'Total';
@@ -2184,6 +2285,7 @@ $('overviewCurrency').onchange = render;
 
 function show(tab) {
  const previous=document.documentElement.dataset.section;
+ if(previous!==tab)accountOrdering=false;
  document.documentElement.dataset.section=tab;
  document.querySelectorAll('.tab').forEach(section=>section.classList.toggle('active',section.id===tab));
  const activeTab = ['contas','relatorios','cierre'].includes(tab)?'ajustes':tab;
