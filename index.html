@@ -1298,6 +1298,10 @@ html[data-tx-view="accounts"] .transaction-options .filters { grid-template-colu
 .tx-bank-icon { display: grid; place-items: center; width: 8cqw; height: 8cqw }
 .tx-bank-icon .bank-icon, .tx-bank-icon .bank-fallback { width: 100%; height: 100%; object-fit: contain }
 .tx-account-row .tx-movement-value { max-width: 35cqw }
+.tx-account-actions { display: flex; justify-content: end; padding-top: 4px }
+.tx-account-actions button[hidden] { display: none }
+.tx-account-order-row { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 8px; border-bottom: 1px solid var(--tx-divider) }
+.tx-account-order-row .tx-account-row { border-bottom: 0 }
 </style></head><body>
 
 <main>
@@ -1410,11 +1414,15 @@ html[data-tx-view="accounts"] .transaction-options .filters { grid-template-colu
         <select id="filterType" aria-label="Filtrar por tipo" onchange="changeTransactionView(this.value)"><option value="accounts">Cuentas</option><option value="all">Todos los movimientos</option><option value="expense">Gastos</option><option value="income">Ingresos</option><option value="transfer">Transferencias</option></select>
       </div>
       <label id="txPeriodFilter" class="checkbox-line"><input id="allPeriods" type="checkbox" onchange="render()"> Mostrar transacciones de todos los meses</label>
+      <button id="txAccountDetails" type="button" class="btn secondary hidden" onclick="openHomeDetail('accounts')">Detalle de cuentas</button>
       <button type="button" class="btn secondary" onclick="$('pendingExpenseFiles').click()">Actualizar gastos pendientes</button>
       <input id="pendingExpenseFiles" type="file" accept=".json,application/json" multiple class="hidden" onchange="importarDespesasPendentes(event)">
       <p class="note">Selecciona los archivos JSON que guardaste con Atajos en «En mi iPhone».</p>
       <button type="button" class="btn secondary" onclick="importarDespesaCopiada()">Pegar gasto de Atajos</button>
       <p class="note">Copia el enlace del gasto en Atajos y revisa los datos antes de guardar.</p>
+    </div>
+    <div id="txAccountActions" class="tx-account-actions hidden">
+      <button id="txOrderAccounts" class="link-button" type="button" aria-controls="transactions" aria-pressed="false" onclick="toggleAccountOrdering()">Reordenar</button>
     </div>
     <div id="transactions"></div>
   </div>
@@ -1740,7 +1748,7 @@ function renderHomeSummary(month,currency,totals,isTotal) {
   <article class="home-summary-card">
    <span class="summary-icon ${kind}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${path}</svg></span>
    <div><strong>${format(actual[index])}</strong><h3>${label}</h3><p>${estimateLabel}<span>${format(projected[index])}</span></p></div>
-   ${kind==='balance'?'':`<button class="home-summary-open" type="button" aria-label="Ver ${label.toLowerCase()}" onclick="openHomeDetail('${kind}')"></button>`}
+   ${kind==='balance'?'':`<button class="home-summary-open" type="button" aria-label="Ver ${label.toLowerCase()}" onclick="changeTransactionView('${kind}',true)"></button>`}
   </article>`).join('');
 }
 
@@ -1760,6 +1768,7 @@ const detailIcons = {
 let detailKind='accounts';
 let detailStatementAccount=null;
 let summaryScrollTop=0;
+let detailReturnTab='inicio';
 
 function detailIcon(name) {
  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${detailIcons[name]}</svg>`;
@@ -1773,6 +1782,7 @@ for(const [id,name] of [
 function openHomeDetail(kind) {
  if(!Object.hasOwn(detailLabels,kind))return;
  summaryScrollTop=window.scrollY||0;
+ detailReturnTab=document.documentElement.dataset.section==='movimentos'?'movimentos':'inicio';
  detailKind=kind;
  detailStatementAccount=null;
  document.documentElement.dataset.detailKind=kind;
@@ -1792,7 +1802,7 @@ function backFromHomeDetail() {
   window.scrollTo(0,0);
   return;
  }
- show('inicio');
+ show(detailReturnTab);
  window.scrollTo(0,summaryScrollTop);
 }
 function toggleDetailSearch() {
@@ -1884,7 +1894,8 @@ function accountOrderControls(a,index,count) {
 }
 function moveAccount(id,direction) {
  if(!accountOrdering||(direction!==-1&&direction!==1))return;
- const visible=visibleOrderedAccounts();
+ const section=document.documentElement.dataset.section;
+ const visible=section==='movimentos'?orderedAccounts():visibleOrderedAccounts();
  const index=visible.findIndex(a=>String(a.id)===id);
  const neighbor=visible[index+direction];
  if(index<0||!neighbor)return;
@@ -1902,7 +1913,7 @@ function moveAccount(id,direction) {
  }
  db=next;
  render();
- const container=$(document.documentElement.dataset.section==='resumenDetalle'?'detailItems':'homeAccounts');
+ const container=$(section==='movimentos'?'transactions':section==='resumenDetalle'?'detailItems':'homeAccounts');
  const buttons=Array.from(container.querySelectorAll('[data-order-account]:not(:disabled)')).filter(b=>b.dataset.orderAccount===id);
  (buttons.find(b=>Number(b.dataset.orderStep)===direction)||buttons[0])?.focus({preventScroll:true});
 }
@@ -2115,13 +2126,16 @@ function playMotion(element,keyframes,options) {
  return element.animate(keyframes,options);
 }
 
-function changeTransactionView(type) {
+function changeTransactionView(type,navigate=false) {
  if(!Object.hasOwn(txViewLabels,type))return;
+ accountOrdering=false;
  $('filterType').value=type;
- render();
+ if(navigate)show('movimentos');
+ else render();
 }
 
 function showAllMovements() {
+ accountOrdering=false;
  $('filterType').value='all';
  $('filterCurrency').value='';
  $('allPeriods').checked=false;
@@ -2214,17 +2228,17 @@ function renderTransactionRows(rows,view) {
  }).join('');
 }
 
-function renderTxAccounts() {
- const accounts=orderedAccounts();
+function renderTxAccounts(accounts) {
  if(!accounts.length)return '<p class="empty">No hay cuentas registradas.</p>';
- return `<div class="tx-account-list">${accounts.map(a=>{
+ return `<div class="tx-account-list">${accounts.map((a,index)=>{
   const id=esc(JSON.stringify(String(a.id)));
   const name=esc(a.name);
-  return `<button type="button" class="tx-movement tx-account-row" aria-label="Editar cuenta ${name}" onclick="openAccount(${id})">
+  const row=`<button type="button" class="tx-movement tx-account-row" aria-label="Editar cuenta ${name}" onclick="openAccount(${id})">
    <span class="tx-bank-icon">${bankIcon(a)}</span>
    <span class="tx-movement-description"><strong>${name}</strong><small>${esc(a.currency)}</small></span>
    <span class="tx-movement-value"><strong>${overviewAmountsHidden?'••••••':overviewAmount(balance(a),a.currency)}</strong></span>
   </button>`;
+  return accountOrdering?`<div class="tx-account-order-row">${row}${accountOrderControls(a,index,accounts.length)}</div>`:row;
  }).join('')}</div>`;
 }
 
@@ -2257,8 +2271,13 @@ function renderTransactionPane(month,selectedMonth,sorted,currency,totals,overvi
  renderTransactionSummary(month,view,accountsView?'PYG':summaryCurrency,showConsolidated?allTotals:monthly);
  renderQuoteNote($('transactionFxQuote'),showConsolidated);
  const list=$('transactions');
- if(accountsView)list.innerHTML=renderTxAccounts();
- else{
+ $('txAccountDetails').classList.toggle('hidden',!accountsView);
+ $('txAccountActions').classList.toggle('hidden',!accountsView);
+ if(accountsView){
+  const accounts=orderedAccounts();
+  renderAccountOrderingButton($('txOrderAccounts'),accounts.length);
+  list.innerHTML=renderTxAccounts(accounts);
+ }else{
   const allPeriods=$('allPeriods').checked;
   const rows=sorted.filter(t=>(allPeriods||t.date.startsWith(month))
    &&(!currencyFilter||account(t.accountId)?.currency===currencyFilter)
