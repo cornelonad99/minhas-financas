@@ -1084,6 +1084,8 @@ html[data-section="movimentos"] .quick-close { background: var(--tx-color) }
 }
 
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0 }
+.fx-quote { margin: 0; padding: 8px 0 12px; color: var(--muted); font-size: 11px; line-height: 1.45; overflow-wrap: anywhere }
+.fx-quote a { color: inherit; text-underline-offset: 2px }
 </style></head><body>
 
 <main>
@@ -1124,6 +1126,7 @@ html[data-section="movimentos"] .quick-close { background: var(--tx-color) }
         <div id="homeAccounts"></div>
         <button class="btn account-add" id="homeAddAccount" type="button" onclick="openAccount()">Añadir cuenta</button>
         <div id="accountTotal" class="home-account-total"></div>
+        <p id="homeFxQuote" class="fx-quote" role="status" hidden></p>
       </div>
     </section>
     <section aria-labelledby="home-movements-title">
@@ -1151,6 +1154,7 @@ html[data-section="movimentos"] .quick-close { background: var(--tx-color) }
   </header>
   <div class="transaction-panel">
     <div id="transactionSummary" class="transaction-summary"></div>
+    <p id="transactionFxQuote" class="fx-quote" role="status" hidden></p>
     <div id="transactionOptions" class="transaction-options hidden">
       <div class="filters">
         <select id="filterCurrency" aria-label="Filtrar por moneda" onchange="render()"><option value="">Todas las monedas</option><option>PYG</option><option>BRL</option><option>USD</option></select>
@@ -1333,6 +1337,73 @@ const guaraniOverviewFormat = new Intl.NumberFormat('es-PY',{maximumFractionDigi
 const realOverviewFormat = new Intl.NumberFormat('en-US',{style:'currency',currency:'BRL',currencyDisplay:'narrowSymbol'});
 let overviewAmountsHidden = false;
 
+const fxCacheKey = 'minhas_financas_brl_pyg_v1';
+const fxRateFormat = new Intl.NumberFormat('es-PY',{minimumFractionDigits:2,maximumFractionDigits:4});
+const fxDateFormat = new Intl.DateTimeFormat('es-PY',{dateStyle:'short',timeZone:'UTC'});
+
+function validRealQuote(quote) {
+ return Number.isFinite(quote?.rate)&&quote.rate>0
+  &&Number.isFinite(quote.updated)&&quote.updated>0&&quote.updated<=Date.now()
+  &&Number.isFinite(quote.next)&&quote.next>quote.updated;
+}
+function cachedRealQuote() {
+ try {
+  const quote=JSON.parse(localStorage.getItem(fxCacheKey));
+  return validRealQuote(quote)?quote:null;
+ } catch { return null; }
+}
+let realQuote=cachedRealQuote();
+let fxRetryAfter=0;
+let fxUnavailable=false;
+
+function hasRealAccounts() {
+ return db.accounts.some(a=>a.currency==='BRL');
+}
+function consolidatedBalance(amount,currency) {
+ if(currency!=='PYG'||!realQuote)return amount;
+ const reais=db.accounts.filter(a=>a.currency==='BRL').reduce((sum,a)=>sum+balance(a),0);
+ return amount+reais*realQuote.rate;
+}
+function renderRealQuoteNote(element,visible) {
+ element.hidden=!visible;
+ if(!visible)return;
+ if(!realQuote){
+  element.textContent=fxUnavailable?
+   'Solo saldos en guaraníes por ahora. No se pudo obtener la cotización del real.':
+   'Consultando la cotización del real…';
+  return;
+ }
+ const date=fxDateFormat.format(realQuote.updated);
+ const status=realQuote.next<=Date.now()?' · última cotización disponible':'';
+ element.innerHTML=`R$1 = ${fxRateFormat.format(realQuote.rate)} gs · ${date}${status} · <a href="https://www.exchangerate-api.com" target="_blank" rel="noopener noreferrer">Rates By Exchange Rate API</a>`;
+}
+
+async function refreshRealQuote() {
+ const now=Date.now();
+ if(!hasRealAccounts()||now<fxRetryAfter||(realQuote&&now<realQuote.next))return;
+ fxRetryAfter=Infinity;
+ const controller=new AbortController();
+ const timer=setTimeout(()=>controller.abort(),8000);
+ try {
+  const response=await fetch('https://open.er-api.com/v6/latest/BRL',{signal:controller.signal,credentials:'omit'});
+  if(!response.ok)throw Error('Cotización no disponible');
+  const data=await response.json();
+  const quote={rate:data.rates?.PYG,updated:data.time_last_update_unix*1000,next:data.time_next_update_unix*1000};
+  if(data.result!=='success'||data.base_code!=='BRL'||!validRealQuote(quote))throw Error('Cotización inválida');
+  if(!realQuote||quote.updated>=realQuote.updated){
+   realQuote=quote;
+   try { localStorage.setItem(fxCacheKey,JSON.stringify(quote)); } catch {}
+  }
+  fxUnavailable=false;
+ } catch {
+  fxUnavailable=true;
+ } finally {
+  clearTimeout(timer);
+  fxRetryAfter=Date.now()+60_000;
+ }
+ render();
+}
+
 function overviewAmount(amount,currency) {
  if (currency==='PYG') return guaraniOverviewFormat.format(amount||0)+' gs';
  if (currency==='BRL') return realOverviewFormat.format(amount||0);
@@ -1340,8 +1411,9 @@ function overviewAmount(amount,currency) {
 }
 function renderOverview(totals,currency) {
  const values = overviewAmountsHidden ? ['••••••','••••••','••••••']
-  : [totals.balance,totals.income,totals.expense].map(amount=>overviewAmount(amount,currency));
- $('overviewBalanceValue').textContent = values[0];
+  : [consolidatedBalance(totals.balance,currency),totals.income,totals.expense].map(amount=>overviewAmount(amount,currency));
+ const prefix=!overviewAmountsHidden&&currency==='PYG'&&hasRealAccounts()&&realQuote?'≈ ':'';
+ $('overviewBalanceValue').textContent = prefix+values[0];
  $('overviewIncomeValue').textContent = values[1];
  $('overviewExpenseValue').textContent = values[2];
 
@@ -1355,7 +1427,7 @@ function toggleOverviewVisibility() {
  renderOverview(monthlyTotals(monthInput.value || monthNow(),currency),currency);
 }
 function selectedCurrency() {
- return $('overviewCurrency').value || db.accounts[0]?.currency || 'PYG';
+ return $('overviewCurrency').value || (hasRealAccounts()?'PYG':db.accounts[0]?.currency||'PYG');
 }
 function monthlyTotals(month,currency) {
  const accounts = db.accounts.filter(a=>a.currency===currency);
@@ -1516,7 +1588,7 @@ function closeTransactionView(nextView) {
  animation.finished.then(finish,finish);
 }
 
-function renderTransactionSummary(month,view,currency,monthly) {
+function renderTransactionSummary(month,view,currency,monthly,showConsolidated) {
  let cells;
  if(view==='expense'||view==='income'){
   const pending = db.transactions.reduce((sum,t)=>sum+(
@@ -1528,7 +1600,8 @@ function renderTransactionSummary(month,view,currency,monthly) {
   ]];
  }else{
   const net=monthly.income-monthly.expense;
-  cells=[['Saldo actual',monthly.balance,monthly.balance<0?'red':'green'],['Balance mensual',net,net<0?'red':'green']];
+  const current=showConsolidated?consolidatedBalance(monthly.balance,currency):monthly.balance;
+  cells=[['Saldo actual',current,current<0?'red':'green'],['Balance mensual',net,net<0?'red':'green']];
  }
 
  $('transactionSummary').innerHTML=cells.map(([label,value,tone],index)=>
@@ -1607,7 +1680,9 @@ function renderTransactionPane(month,selectedMonth,sorted,currency,totals) {
  txMonth.textContent=overviewMonthFormat.format(selectedMonth);
  txMonth.setAttribute('aria-label','Seleccionar mes: '+monthFormat.format(selectedMonth));
 
- renderTransactionSummary(month,view,summaryCurrency,monthly);
+ const showConsolidated=!view&&!currencyFilter&&summaryCurrency==='PYG'&&hasRealAccounts();
+ renderTransactionSummary(month,view,summaryCurrency,monthly,showConsolidated);
+ renderRealQuoteNote($('transactionFxQuote'),showConsolidated);
  const allPeriods=$('allPeriods').checked;
  const rows=sorted.filter(t=>(allPeriods||t.date.startsWith(month))
   &&(!currencyFilter||account(t.accountId)?.currency===currencyFilter)
@@ -1642,7 +1717,11 @@ function render() {
  const visibleAccounts = db.accounts.filter(a=>a.currency===currency);
  $('homeAccounts').innerHTML = visibleAccounts.length?visibleAccounts.map(homeAccountRow).join(''):`<div class="empty">No hay cuentas en ${currency}.</div>`;
  $('homeAddAccount').classList.toggle('hidden',visibleAccounts.length>0);
- $('accountTotal').innerHTML = `<span>Total</span><span>${overviewAmount(totals.balance,currency)}</span>`;
+ const showRealQuote=currency==='PYG'&&hasRealAccounts();
+ const total=consolidatedBalance(totals.balance,currency);
+ const projected=showRealQuote&&realQuote;
+ $('accountTotal').innerHTML = `<span>${projected?'Total en guaraníes':'Total'}</span><span>${projected?'≈ ':''}${overviewAmount(total,currency)}</span>`;
+ renderRealQuoteNote($('homeFxQuote'),showRealQuote);
  $('accountList').innerHTML = db.accounts.length?`<div class="card account-panel">${db.accounts.map(accountRow).join('')}</div>`:'<div class="card empty">No hay cuentas registradas.</div>';
  const sorted = [...db.transactions].sort((a,b)=>b.date.localeCompare(a.date)||b.created.localeCompare(a.created));
  $('recent').innerHTML = sorted.slice(0,5).map(transactionRow).join('')||'<div class="empty">Aún no hay movimientos.</div>';
@@ -1657,6 +1736,7 @@ function render() {
  $('categories').innerHTML = db.categories.map(x=>`<div class="row"><span>${esc(categoryLabel(x.name,x.type))} <span class="badge">${typeLabels[x.type]}</span></span><button type="button" class="btn secondary compact" onclick="removeCategory('${encodeURIComponent(x.name)}','${x.type}')">Eliminar</button></div>`).join('');
  renderWeeklyLimits();
  if($('cierre').classList.contains('active'))renderMonthlyClosing(isClosingDate(month+'-01')?month:monthNow(),sorted);
+ void refreshRealQuote();
 }
 $('overviewCurrency').onchange = render;
 
@@ -2139,5 +2219,7 @@ $('weeklyForm').addEventListener('submit',e=>{
 function deleteWeeklyExpense(bid,eid){const b=db.weeklyBudgets.find(x=>x.id===bid);if(!b)return;const x=b.expenses.find(y=>y.id===eid);if(!x||!confirm('¿Eliminar este gasto del control semanal?'))return;b.expenses=b.expenses.filter(y=>y.id!==eid);save()}
 function deleteWeeklyLimit(id){const b=db.weeklyBudgets.find(x=>x.id===id);if(!b||!confirm('¿Eliminar este límite y todos sus gastos semanales? Se conservarán los movimientos y saldos de tus cuentas.'))return;db.weeklyBudgets=db.weeklyBudgets.filter(x=>x.id!==id);save()}
 
+window.addEventListener('online',refreshRealQuote);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)void refreshRealQuote()});
 show('inicio');abrirDespesaDoAtalho();if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 </script></body></html>
