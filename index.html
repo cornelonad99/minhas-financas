@@ -1160,6 +1160,109 @@ html[data-theme="dark"] .home-summary {
 .home-summary-card h3 { margin: .36cqw 0 1.9cqw }
 .home-summary-card p { overflow-wrap: anywhere }
 .home-summary-card p span { display: block }
+html[data-section="resumenDetalle"] {
+  --top-surface: var(--detail-accent);
+  background-color: var(--detail-accent);
+  overscroll-behavior-y: none;
+}
+html[data-detail-kind="accounts"] { --detail-accent: #2189df }
+html[data-detail-kind="income"] { --detail-accent: #159b55 }
+html[data-detail-kind="expense"] { --detail-accent: #df4b39 }
+html[data-section="resumenDetalle"] nav { display: none }
+html[data-section="resumenDetalle"] main { padding-bottom: 0 }
+#resumenDetalle {
+  container-type: inline-size;
+  min-height: 100dvh;
+  background: var(--surface);
+  --detail-ink: #4c4d5e;
+  --detail-muted: #737373;
+  --detail-rule: #e9e9e9;
+  --detail-account-surface: #f5f8fc;
+  --detail-card-border: #d3e3f6;
+}
+html[data-theme="dark"] #resumenDetalle {
+  --detail-ink: var(--ink);
+  --detail-muted: var(--muted);
+  --detail-rule: var(--line);
+  --detail-account-surface: var(--page);
+  --detail-card-border: var(--line);
+}
+html[data-detail-kind="accounts"] #resumenDetalle { background: var(--detail-account-surface) }
+.detail-header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: var(--top-inset) 3cqw 2cqw;
+  color: white;
+  background: var(--detail-accent);
+  box-shadow: 0 5px 7px #0003;
+}
+.detail-toolbar { display: grid; grid-template-columns: 9cqw minmax(0,1fr) repeat(3,8.4cqw); gap: 2.4cqw; align-items: center; min-height: 14.2cqw }
+.detail-toolbar h1 { font-size: 4.3cqw; font-weight: 500; overflow-wrap: anywhere; margin: 0 }
+.detail-toolbar p { margin: .7cqw 0 0; color: #ffffffb8; font-size: 2.95cqw }
+.detail-button {
+  display: grid; place-items: center; color: inherit; background: transparent; border: 0;
+  border-radius: 100px; padding: 0; width: 100%; min-height: 40px;
+}
+.detail-button:active { background: #ffffff29 }
+.detail-button svg { width: 5cqw; height: 5cqw }
+.detail-month { width: min(45cqw, 240px); margin: 0 auto; display: grid; grid-template-columns: 8cqw minmax(0,1fr) 8cqw; align-items: center; min-height: 9.8cqw; text-align: center }
+.detail-month .month-label { font-weight: 500; font-size: 3.75cqw; text-transform: capitalize }
+.detail-month .detail-button svg { width: 3.8cqw; height: 3.8cqw }
+.detail-controls { display: grid; gap: 8px; padding-top: 10px }
+.detail-controls input, .detail-controls select { color: var(--ink); width: 100% }
+.detail-content { padding-bottom: calc(24cqw + env(safe-area-inset-bottom)); color: var(--detail-ink) }
+html[data-detail-kind="accounts"] .detail-content { padding: 3cqw 2.8cqw calc(24cqw + env(safe-area-inset-bottom)) }
+.detail-account {
+  display: grid; grid-template-columns: 11.4cqw minmax(0,1fr) auto; gap: 2.7cqw;
+  align-items: center; padding: 3.65cqw 5.3cqw 3.65cqw 2.8cqw; margin-bottom: 1.85cqw;
+  border: 1px solid var(--detail-card-border); border-radius: 2cqw; background: var(--surface);
+}
+.detail-account .bank-icon,.detail-account .bank-fallback {
+  width: 11.4cqw; height: 11.4cqw; object-fit: contain; border-radius: 50%;
+}
+.detail-name,.detail-amount { font-size: 3.68cqw; line-height: 1.2; overflow-wrap: anywhere; font-weight: 400 }
+.detail-subtext { display: block; color: var(--detail-muted); font-size: 2.9cqw; margin: 1.3cqw 0 0 }
+.detail-account-actions { display: flex; gap: 1.5cqw; justify-content: end; color: var(--detail-muted) }
+.detail-account-actions .detail-button { width: max(34px,5cqw) }
+.detail-account-actions .detail-button svg { width: 3.8cqw; height: 3.8cqw }
+.detail-account-value { text-align: end; max-width: 35cqw }
+.detail-transaction {
+  display: grid; grid-template-columns: 9.55cqw minmax(0,1fr) minmax(0,auto) max(32px,4.5cqw);
+  align-items: center; gap: 2.7cqw; padding: 3.05cqw 2.8cqw; border-bottom: 1px solid var(--detail-rule);
+}
+.detail-transaction .detail-subtext { margin: 0 0 1.3cqw }
+.detail-status {
+  display: grid; place-items: center; width: 9.55cqw; height: 9.55cqw; border-radius: 50%;
+  color: var(--detail-accent); background: color-mix(in srgb,var(--detail-accent) 12%,var(--surface));
+}
+.detail-status svg { width: 4.4cqw; height: 4.4cqw; stroke-width: 2.5 }
+.detail-transaction-main {
+  display: block; width: 100%; text-align: start; min-width: 0;
+  background: transparent; color: inherit; border: 0; padding: 0;
+}
+.detail-category { display: inline-flex; margin-top: 1.35cqw; padding: .35cqw 2.2cqw; gap: 1.2cqw; border-radius: 99px; background: #777; color: white; font-size: 2.45cqw }
+.detail-transaction-value { text-align: end; max-width: 35cqw }
+.detail-transaction > .detail-button { align-self: start; color: var(--detail-muted) }
+.detail-transaction > .detail-button svg { width: 4.1cqw; height: 4.1cqw }
+.detail-sort { color: var(--detail-muted); margin: 10cqw auto 0; text-align: center }
+.detail-sort button { border: 0; background: none; color: inherit; font-size: 3.1cqw; padding: 8px }
+.detail-sort svg { display: block; width: 4.75cqw; height: 4.75cqw; margin: 0 auto 1.3cqw }
+.detail-add {
+  position: fixed; z-index: 3; inset-inline-end: max(3.64vw,calc((100vw - 620px)/2 + 16px));
+  bottom: max(min(11.4vw, 70px),calc(env(safe-area-inset-bottom) + 16px));
+  width: clamp(46px,12.7vw,64px); height: clamp(46px,12.7vw,64px);
+  color: white; background: var(--detail-accent); border: 0; border-radius: 50%; display: grid; place-items: center;
+  box-shadow: 0 7px 12px #0004; padding: 0;
+}
+.detail-add svg { width: clamp(20px,4.8vw,26px); height: clamp(20px,4.8vw,26px) }
+html:not([data-section="resumenDetalle"]) .detail-add { display: none }
+.home-summary-card { position: relative }
+.home-summary-open {
+  position: absolute; inset: 0; width: 100%; padding: 0; border: 0;
+  border-radius: inherit; background: transparent; cursor: pointer;
+}
+.home-summary-card:has(.home-summary-open:active) { transform: scale(.98) }
 </style></head><body>
 
 <main>
@@ -1222,6 +1325,32 @@ html[data-theme="dark"] .home-summary {
     </section>
   </div>
 </section>
+
+<section id="resumenDetalle" class="tab" aria-labelledby="detailTitle">
+  <header class="detail-header">
+    <div class="detail-toolbar">
+      <button id="detailBack" class="detail-button" type="button" aria-label="Volver" onclick="backFromHomeDetail()"></button>
+      <div><h1 id="detailTitle"></h1><p id="detailTotal"></p></div>
+      <button id="detailSearchButton" class="detail-button" type="button" aria-label="Buscar" aria-expanded="false" onclick="toggleDetailSearch()"></button>
+      <button id="detailStatement" class="detail-button" type="button" aria-label="Ver movimientos" onclick="openDetailStatement()"></button>
+      <button id="detailMore" class="detail-button" type="button" aria-label="Opciones" aria-expanded="false" onclick="toggleDetailOptions()"></button>
+    </div>
+    <div class="detail-month">
+      <button id="detailPrevious" type="button" class="detail-button" aria-label="Mes anterior" onclick="shiftMonth(-1)"></button>
+      <span class="month-label"></span>
+      <button id="detailNext" type="button" class="detail-button" aria-label="Mes siguiente" onclick="shiftMonth(1)"></button>
+    </div>
+    <div id="detailSearchRow" class="detail-controls hidden"><input id="detailSearch" type="search" aria-label="Buscar" placeholder="Buscar" oninput="render()"></div>
+    <div id="detailOptions" class="detail-controls hidden">
+      <select id="detailOrder" aria-label="Orden" onchange="render()"><option value="recent">Orden original</option><option value="amount">Mayor importe primero</option><option value="name">Nombre A–Z</option></select>
+    </div>
+  </header>
+  <div class="detail-content">
+    <div id="detailItems"></div>
+    <div id="detailSort" class="detail-sort hidden"><button id="detailSortButton" type="button" onclick="toggleDetailOptions()"></button></div>
+  </div>
+</section>
+<button id="detailAdd" class="detail-add" type="button" aria-label="Añadir" onclick="addFromHomeDetail()"></button>
 
 <section id="movimentos" class="tab" aria-label="Transacciones">
   <header class="tx-header">
@@ -1574,7 +1703,178 @@ function renderHomeSummary(month,currency,totals,isTotal) {
   <article class="home-summary-card">
    <span class="summary-icon ${kind}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${path}</svg></span>
    <div><strong>${format(actual[index])}</strong><h3>${label}</h3><p>${estimateLabel}<span>${format(projected[index])}</span></p></div>
+   ${kind==='balance'?'':`<button class="home-summary-open" type="button" aria-label="Ver ${label.toLowerCase()}" onclick="openHomeDetail('${kind}')"></button>`}
   </article>`).join('');
+}
+
+const detailLabels = {accounts:'Cuentas',income:'Ingresos',expense:'Gastos'};
+const detailWeekday = new Intl.DateTimeFormat('es-PY',{weekday:'short',timeZone:'UTC'});
+const detailIcons = {
+ back:'<path d="m15 3-9 9 9 9"/>',
+ previous:'<path d="m15 4-8 8 8 8"/>',
+ next:'<path d="m9 4 8 8-8 8"/>',
+ search:'<circle cx="10.5" cy="10.5" r="7"/><path d="m16 16 6 6"/>',
+ statement:'<path d="M4 2l2 2 2-2 2 2 2-2 2 2 2-2 2 2 2-2v20l-2-2-2 2-2-2-2 2-2-2-2 2-2-2-2 2z"/><path d="M8 8h8m-8 4h8m-8 4h8"/>',
+ list:'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M10 8h7m-7 4h7m-7 4h7M6.5 8h.1m-.1 4h.1m-.1 4h.1"/>',
+ more:'<circle cx="4" cy="12" r="2" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="2" fill="currentColor" stroke="none"/><circle cx="20" cy="12" r="2" fill="currentColor" stroke="none"/>',
+ add:'<path d="M12 4v16M4 12h16"/>',
+ sort:'<path d="M3 5h18M3 11h12M3 17h6"/>'
+};
+let detailKind='accounts';
+let detailStatementAccount=null;
+let summaryScrollTop=0;
+
+function detailIcon(name) {
+ return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${detailIcons[name]}</svg>`;
+}
+
+for(const [id,name] of [
+ ['detailBack','back'],['detailSearchButton','search'],['detailStatement','statement'],['detailMore','more'],
+ ['detailPrevious','previous'],['detailNext','next'],['detailSortButton','sort'],['detailAdd','add']
+])$(id).innerHTML=detailIcon(name)+(name==='sort'?'Ordenar':'');
+
+function openHomeDetail(kind) {
+ if(!Object.hasOwn(detailLabels,kind))return;
+ summaryScrollTop=window.scrollY||0;
+ detailKind=kind;
+ detailStatementAccount=null;
+ document.documentElement.dataset.detailKind=kind;
+ $('detailSearch').value='';
+ $('detailOrder').value='recent';
+ for(const [panel,button] of [['detailSearchRow','detailSearchButton'],['detailOptions','detailMore']]){
+  $(panel).classList.toggle('hidden',true);
+  $(button).setAttribute('aria-expanded','false');
+ }
+ show('resumenDetalle');
+}
+function backFromHomeDetail() {
+ if(detailStatementAccount!==null){
+  detailStatementAccount=null;
+  $('detailSearch').value='';
+  render();
+  window.scrollTo(0,0);
+  return;
+ }
+ show('inicio');
+ window.scrollTo(0,summaryScrollTop);
+}
+function toggleDetailSearch() {
+ const hidden=$('detailSearchRow').classList.toggle('hidden');
+ $('detailSearchButton').setAttribute('aria-expanded',String(!hidden));
+ if(!hidden)$('detailSearch').focus();
+ else{$('detailSearch').value='';render()}
+}
+function toggleDetailOptions() {
+ const hidden=$('detailOptions').classList.toggle('hidden');
+ $('detailMore').setAttribute('aria-expanded',String(!hidden));
+ if(!hidden)$('detailOrder').focus();
+}
+function showSummaryStatement(id='') {
+ detailStatementAccount=id;
+ $('detailSearch').value='';
+ render();
+ window.scrollTo(0,0);
+}
+function openDetailStatement() {
+ if(detailKind==='accounts'){
+  if(detailStatementAccount!==null)backFromHomeDetail();
+  else showSummaryStatement();
+  return;
+ }
+ $('filterType').value=detailKind;
+ $('filterCurrency').value=selectedBalanceView()==='TOTAL'?'':selectedCurrency();
+ $('allPeriods').checked=false;
+ show('movimentos');
+}
+function addFromHomeDetail() {
+ if(detailKind==='accounts'&&detailStatementAccount===null){openAccount();return}
+ const type=detailKind==='income'?'income':'expense';
+ openTransaction(undefined,type,detailStatementAccount||undefined);
+ if(!$('fDate')||!$('modal').open)return;
+ const month=monthInput.value||monthNow();
+ if(!today().startsWith(month)){
+  $('fDate').value=month+'-01';
+  updateEntryDate();
+ }
+}
+function detailAmount(amount,currency) {
+ return overviewAmountsHidden?'••••••':overviewAmount(amount,currency).replace(/ gs$/,' Gs');
+}
+function detailAccountRow(a) {
+ const id=esc(JSON.stringify(String(a.id)));
+ const name=esc(a.name);
+ return `<article class="detail-account">
+  ${bankIcon(a)}
+  <div class="detail-name">${name}<span class="detail-subtext">${esc(a.currency)}</span></div>
+  <div class="detail-account-value">
+   <div class="detail-account-actions">
+    <button class="detail-button" type="button" aria-label="Movimientos de ${name}" onclick="showSummaryStatement(${id})">${detailIcon('list')}</button>
+    <button class="detail-button" type="button" aria-label="Editar cuenta ${name}" onclick="openAccount(${id})">${detailIcon('more')}</button>
+   </div>
+   <span class="detail-amount">${detailAmount(balance(a),a.currency)}</span>
+  </div>
+ </article>`;
+}
+function detailMovementRow(t) {
+ const a=account(t.accountId);
+ const destination=account(t.toAccountId);
+ const category=categoryLabel(t.category,t.type)||'Sin categoría';
+ const title=t.type==='transfer'?'Transferencia → '+(destination?.name||'Cuenta'):t.description||category;
+ const id=esc(JSON.stringify(String(t.id)));
+ const edit=t.type==='transfer'?'openTransfer':'openTransaction';
+ const realized=isRealized(t);
+ const date=isClosingDate(t.date)?t.date.slice(-2)+' • '+detailWeekday.format(new Date(t.date)).replace(/\.$/,''):t.date;
+ return `<article class="detail-transaction">
+  <span class="detail-status" title="${realized?'Realizado':'Pendiente'}"><span class="sr-only">${realized?'Realizado':'Pendiente'}</span>${entryIcon(realized?'statusCheck':'statusClock')}</span>
+  <button class="detail-transaction-main" type="button" onclick="${edit}(${id})">
+   <span class="detail-subtext">${esc(a?.name||'Cuenta eliminada')}</span>
+   <span class="detail-name">${esc(title)}</span>
+   <span class="detail-category">${esc(category)} <span aria-hidden="true">›</span></span>
+  </button>
+  <div class="detail-transaction-value"><span class="detail-subtext">${esc(date)}</span><span class="detail-amount">${detailAmount(t.amount,a?.currency||destination?.currency||'PYG')}</span></div>
+  <button class="detail-button" type="button" aria-label="Editar ${esc(title)}" onclick="${edit}(${id})">${detailIcon('more')}</button>
+ </article>`;
+}
+function normalizeDetailText(value) {
+ return String(value||'').normalize('NFD').replace(/\p{M}/gu,'').toLowerCase().trim();
+}
+function renderHomeDetail(month,sorted,currency,overview,visibleAccounts) {
+ const accountsPage=detailKind==='accounts'&&detailStatementAccount===null;
+ const statement=detailKind==='accounts'&&!accountsPage;
+ const statementAccount=statement&&account(detailStatementAccount);
+ const title=statement?(statementAccount?.name||'Movimientos'):detailLabels[detailKind];
+ const total=detailKind==='accounts'?overview.balance:overview[detailKind];
+ const totalLabel=statementAccount?detailAmount(balance(statementAccount),statementAccount.currency):detailAmount(total,currency);
+ $('detailTitle').textContent=title;
+ $('detailTotal').textContent=totalLabel+(overview.partial&&!statementAccount?' · parcial':'');
+ $('detailAdd').setAttribute('aria-label',accountsPage?'Añadir cuenta':detailKind==='income'?'Añadir ingreso':'Añadir gasto');
+ $('detailSort').classList.toggle('hidden',!accountsPage);
+
+ const needle=normalizeDetailText($('detailSearch').value);
+ const order=$('detailOrder').value;
+ const allCurrencies=selectedBalanceView()==='TOTAL';
+ const matchesText=(...values)=>values.some(value=>normalizeDetailText(value).includes(needle));
+ let html;
+ if(accountsPage){
+  const accounts=visibleAccounts.filter(a=>matchesText(a.name,a.currency));
+  if(order==='name')accounts.sort((a,b)=>a.name.localeCompare(b.name,'es'));
+  if(order==='amount')accounts.sort((a,b)=>a.currency.localeCompare(b.currency)||balance(b)-balance(a));
+  html=accounts.map(detailAccountRow).join('');
+ }else{
+  const rows=sorted.filter(t=>{
+   const from=account(t.accountId);
+   const to=account(t.toAccountId);
+   return t.date.startsWith(month)
+    &&(statement||t.type===detailKind)
+    &&(!statementAccount||t.accountId===statementAccount.id||t.toAccountId===statementAccount.id)
+    &&(allCurrencies||from?.currency===currency||to?.currency===currency)
+    &&matchesText(t.description,categoryLabel(t.category,t.type),from?.name,to?.name);
+  });
+  if(order==='name')rows.sort((a,b)=>(a.description||a.category||'').localeCompare(b.description||b.category||'','es'));
+  if(order==='amount')rows.sort((a,b)=>(account(a.accountId)?.currency||'').localeCompare(account(b.accountId)?.currency||'')||b.amount-a.amount);
+  html=rows.map(detailMovementRow).join('');
+ }
+ $('detailItems').innerHTML=html||`<p class="empty">${needle?'Sin resultados.':accountsPage?'No hay cuentas registradas.':'No hay movimientos en este mes.'}</p>`;
 }
 
 function categoryBreakdown(totals,currency) {
@@ -1869,6 +2169,7 @@ function render() {
  $('homeCategories').innerHTML = categoryBreakdown(overview,currency);
 
  renderTransactionPane(month,selectedMonth,sorted,currency,totals,overview);
+ if($('resumenDetalle').classList.contains('active'))renderHomeDetail(month,sorted,currency,overview,visibleAccounts);
 
  $('reports').innerHTML = currencies.map(code=>{
   const report = code===currency?totals:monthlyTotals(month,code);
@@ -1896,7 +2197,7 @@ function show(tab) {
  window.scrollTo(0,0);
  render();
  syncTopColor();
- const animatedContent=tab==='inicio'?$('summary'):tab==='movimentos'?$('transactions'):$(tab);
+ const animatedContent=tab==='inicio'?$('summary'):tab==='movimentos'?$('transactions'):tab==='resumenDetalle'?$('detailItems'):$(tab);
  if(previous&&previous!==tab)playMotion(animatedContent,[{opacity:.76,transform:'translateY(5px)'},{opacity:1,transform:'translateY(0)'}],
   {duration:200,easing:'cubic-bezier(.23,.76,.29,1)'});
 }
