@@ -1086,6 +1086,80 @@ html[data-section="movimentos"] .quick-close { background: var(--tx-color) }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0 }
 .fx-quote { margin: 0; padding: 8px 0 12px; color: var(--muted); font-size: 11px; line-height: 1.45; overflow-wrap: anywhere }
 .fx-quote a { color: inherit; text-underline-offset: 2px }
+.home-summary {
+  --summary-card-border: #d3e3f6;
+  --summary-card-ink: #4c4d5e;
+  --summary-card-muted: #757575;
+  margin-inline: calc(2.73cqw - 15px);
+}
+html[data-theme="dark"] .home-summary {
+  --summary-card-border: var(--line);
+  --summary-card-ink: var(--ink);
+  --summary-card-muted: var(--muted);
+}
+.home-summary-header { display: flex; align-items: center; justify-content: space-between; margin: 0 1.8cqw 2.8cqw }
+.home-summary-header h2 { color: var(--summary-card-ink); font-size: 3.96cqw; font-weight: 400 }
+.home-summary-options { position: relative; color: var(--summary-card-muted) }
+.home-summary-options summary { display: grid; place-items: center; width: 44px; min-height: 32px; list-style: none; cursor: pointer }
+.home-summary-options summary::-webkit-details-marker { display: none }
+.home-summary-options svg { width: 4.6cqw; height: 4.6cqw }
+.home-summary-options p {
+  position: absolute;
+  inset-inline-end: 0;
+  z-index: 1;
+  width: min(75cqw, 255px);
+  padding: 12px;
+  border: 1px solid var(--summary-card-border);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  background: var(--surface);
+  font-size: 12px;
+  line-height: 1.4;
+}
+.home-summary-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 2.83cqw }
+.home-summary-card {
+  display: grid;
+  grid-template-columns: 8.2cqw minmax(0,1fr);
+  align-items: start;
+  gap: 2.7cqw;
+  min-height: 24.3cqw;
+  padding: 3.1cqw 2.75cqw 2.8cqw;
+  border: 1px solid var(--summary-card-border);
+  border-radius: 6.55cqw;
+  background: var(--surface);
+}
+.home-summary-card .summary-icon {
+  display: grid;
+  place-items: center;
+  width: 8.2cqw;
+  height: 8.2cqw;
+  border-radius: 50%;
+  color: #fff;
+  background: var(--summary-icon-color);
+  box-shadow: 0 .9cqw 1.55cqw color-mix(in srgb,var(--summary-icon-color),transparent 88%);
+}
+.summary-icon svg { width: 4.4cqw; height: 4.4cqw }
+.summary-icon.accounts { --summary-icon-color: #1989e5 }
+.summary-icon.balance { --summary-icon-color: #f4ae00 }
+.summary-icon.income { --summary-icon-color: #129d5a }
+.summary-icon.expense { --summary-icon-color: #df4b39 }
+.home-summary-card strong {
+  display: block;
+  color: var(--summary-card-ink);
+  font-size: 3.93cqw;
+  line-height: 1.15;
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+.home-summary-card h3, .home-summary-card p {
+  color: var(--summary-card-muted);
+  font-size: 2.95cqw;
+  font-weight: 400;
+  line-height: 1.35;
+}
+.home-summary-card h3 { margin: .36cqw 0 1.9cqw }
+.home-summary-card p { overflow-wrap: anywhere }
+.home-summary-card p span { display: block }
 </style></head><body>
 
 <main>
@@ -1115,6 +1189,15 @@ html[data-section="movimentos"] .quick-close { background: var(--tx-color) }
     </div>
   </div>
   <div class="screen-body home-body">
+    <section class="home-summary" aria-labelledby="homeSummaryTitle">
+      <div class="home-summary-header"><h2 id="homeSummaryTitle">Resumen</h2>
+        <details class="home-summary-options">
+          <summary aria-label="Cómo se calcula el resumen"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2.2"/><circle cx="12" cy="12" r="2.2"/><circle cx="19" cy="12" r="2.2"/></svg></summary>
+          <p>Balance es la diferencia entre ingresos y gastos del mes. Los importes estimados incluyen los movimientos pendientes del mes seleccionado.</p>
+        </details>
+      </div>
+      <div id="homeSummaryGrid" class="home-summary-grid"></div>
+    </section>
     <section class="home-accounts" aria-labelledby="home-accounts-title">
       <div class="home-accounts-heading">
         <h2 id="home-accounts-title">Cuentas</h2>
@@ -1465,6 +1548,35 @@ function monthlyTotals(month,currency) {
   expense: expenses.reduce((sum,t)=>sum+t.amount,0)
  };
 }
+const homeSummaryCards = [
+ ['accounts','Cuentas','<path d="M3 8 12 3l9 5H3m0 12h18M6 11v5m6-5v5m6-5v5"/>'],
+ ['balance','Balance','<path d="M9 15V5m-3 3 3-3 3 3m3 1v10m-3-3 3 3 3-3"/>'],
+ ['income','Ingresos','<path d="M12 6v12M6 12h12"/>'],
+ ['expense','Gastos','<path d="M6 12h12"/>']
+];
+
+function renderHomeSummary(month,currency,totals,isTotal) {
+ const pending={income:0,expense:0};
+ for(const tx of db.transactions){
+  if(isRealized(tx)||!tx.date.startsWith(month)||!Object.hasOwn(pending,tx.type))continue;
+  const code=account(tx.accountId)?.currency;
+  if(!code||(!isTotal&&code!==currency))continue;
+  const rate=code===currency?1:guaraniRate(code);
+  if(rate)pending[tx.type]+=Number(tx.amount)*rate;
+ }
+ const net=totals.income-totals.expense;
+ const pendingNet=pending.income-pending.expense;
+ const actual=[totals.balance,net,totals.income,totals.expense];
+ const projected=[totals.balance+pendingNet,net+pendingNet,totals.income+pending.income,totals.expense+pending.expense];
+ const format=amount=>overviewAmountsHidden?'••••••':overviewAmount(amount,currency).replace(/ gs$/,' Gs');
+ const estimateLabel=totals.partial?'Estimado parcial':'Estimado';
+ $('homeSummaryGrid').innerHTML=homeSummaryCards.map(([kind,label,path],index)=>`
+  <article class="home-summary-card">
+   <span class="summary-icon ${kind}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${path}</svg></span>
+   <div><strong>${format(actual[index])}</strong><h3>${label}</h3><p>${estimateLabel}<span>${format(projected[index])}</span></p></div>
+  </article>`).join('');
+}
+
 function categoryBreakdown(totals,currency) {
  if (!totals.expenses.length) return '<div class="empty"><span class="empty-icon" aria-hidden="true">◷</span>No hay gastos este mes.</div>';
  const groups = new Map();
@@ -1742,6 +1854,7 @@ function render() {
  const totals=monthlyTotals(month,currency);
  const overview=allCurrencies?consolidatedTotals(month,totals):totals;
  renderOverview(overview,currency);
+ renderHomeSummary(month,currency,overview,allCurrencies);
 
  const visibleAccounts=allCurrencies?db.accounts:db.accounts.filter(a=>a.currency===currency);
  $('homeAccounts').innerHTML=visibleAccounts.length?visibleAccounts.map(homeAccountRow).join('')
