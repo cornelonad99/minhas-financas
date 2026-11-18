@@ -1289,19 +1289,9 @@ html:not([data-section="resumenDetalle"]) .detail-add { display: none }
   color: var(--accent); font: inherit; font-size: 18px; cursor: pointer;
 }
 .account-order-controls button:disabled { opacity: .32; cursor: default }
-.tx-account-list { padding-top: 2.4cqw }
-html[data-tx-view="accounts"] .transaction-options .filters { grid-template-columns: 1fr }
-.tx-account-row {
-  align-items: center; min-height: 15.5cqw; padding: 2.2cqw 0;
-  border-bottom: 1px solid var(--tx-divider); border-radius: 0;
-}
-.tx-bank-icon { display: grid; place-items: center; width: 8cqw; height: 8cqw }
-.tx-bank-icon .bank-icon, .tx-bank-icon .bank-fallback { width: 100%; height: 100%; object-fit: contain }
-.tx-account-row .tx-movement-value { max-width: 35cqw }
 .tx-account-actions { display: flex; justify-content: end; padding-top: 4px }
 .tx-account-actions button[hidden] { display: none }
-.tx-account-order-row { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 8px; border-bottom: 1px solid var(--tx-divider) }
-.tx-account-order-row .tx-account-row { border-bottom: 0 }
+
 html[data-section="graficos"] { --top-surface: #5419d1; background: #5419d1 }
 #graficos { container-type: inline-size; background: #5419d1; min-height: 100dvh }
 .chart-header { padding: var(--top-inset) 3.4cqw 6.35cqw; color: #fff }
@@ -1348,6 +1338,131 @@ html[data-theme="dark"] .chart-group-tabs button:not([aria-pressed="true"]) { ba
 .home-chart-legend b { color: #ef493b; font-weight: 400; font-size: 2.4cqw }
 .home-chart-caption { color: var(--muted); font-size: 11px; grid-column: 1/-1; margin: 0 }
 .chart-empty { padding: 20cqw 8cqw; text-align: center; color: var(--muted); font-size: 3.4cqw }
+
+/* Account cards scaled from the reference image. */
+#movimentos[data-view="accounts"] {
+ --account-card-surface: #fff;
+ --account-card-page: #f5f8fc;
+ --account-card-line: #d6e3f2;
+ --account-card-text: #51515f;
+ --account-card-muted: #777;
+}
+html[data-theme="dark"] #movimentos[data-view="accounts"] {
+ --account-card-surface: var(--surface);
+ --account-card-page: var(--page);
+ --account-card-line: var(--line);
+ --account-card-text: var(--ink);
+ --account-card-muted: var(--muted);
+}
+#movimentos[data-view="accounts"] .transaction-panel {
+ background: var(--account-card-page);
+ padding-inline: 2.8cqw;
+}
+.tx-account-list { padding-top: 2cqw }
+.tx-account-card {
+ display: grid;
+ grid-template-columns: 11.4cqw minmax(0,1fr) minmax(0,auto);
+ align-items: center;
+ gap: 2.7cqw;
+ min-height: 19cqw;
+ margin-bottom: 1.85cqw;
+ padding: 3.65cqw 5.3cqw 3.65cqw 2.8cqw;
+ border: 1px solid var(--account-card-line);
+ border-radius: 2cqw;
+ background: var(--account-card-surface);
+ box-shadow: 0 .6cqw 1.7cqw #23395904;
+ color: var(--account-card-text);
+}
+.account-round-icon {
+ display: grid;
+ place-items: center;
+ flex: none;
+ width: 11.4cqw;
+ height: 11.4cqw;
+ border-radius: 50%;
+ overflow: hidden;
+ background: #f7f7f7;
+ color: #555;
+}
+.account-round-icon[data-bank="nubank"] { background: #8a05be }
+.account-round-icon[data-bank="ueno-bank"] { background: #00e876 }
+.account-round-icon[data-bank="banco-continental"] { background: #254583 }
+.account-round-icon[data-bank="bnf"] { background: #19343f }
+.account-round-icon .bank-icon {
+ display: block;
+ width: 100%;
+ height: 100%;
+ border-radius: 0;
+ object-fit: contain;
+ background: transparent;
+}
+.account-round-icon .bank-fallback,
+.account-round-icon > svg {
+ width: 6.6cqw;
+ height: 6.6cqw;
+ background: transparent;
+ color: inherit;
+ border-radius: 0;
+}
+.tx-account-title {
+ min-width: 0;
+ border: 0;
+ background: transparent;
+ color: inherit;
+ text-align: start;
+ padding: 0;
+ cursor: pointer;
+}
+.tx-account-title strong {
+ display: block;
+ font-size: 3.68cqw;
+ line-height: 1.2;
+ font-weight: 400;
+ overflow-wrap: anywhere;
+}
+.tx-account-title small {
+ display: block;
+ font-size: 2.9cqw;
+ line-height: 1.2;
+ font-weight: 400;
+ color: var(--account-card-muted);
+ margin-top: 2.3cqw;
+}
+.tx-account-value { min-width: 0; max-width: 35cqw; text-align: end; align-self: start }
+.tx-account-buttons {
+ display: flex;
+ justify-content: end;
+ gap: 2.2cqw;
+ margin-bottom: 1.2cqw;
+ color: var(--account-card-muted);
+}
+.tx-account-buttons button {
+ display: grid;
+ place-items: center;
+ min-width: 32px;
+ min-height: 32px;
+ border: 0;
+ border-radius: 50%;
+ padding: 0;
+ color: inherit;
+ background: transparent;
+ cursor: pointer;
+}
+.tx-account-buttons button svg { width: 3.8cqw; height: 3.8cqw }
+.tx-account-buttons button:active { background: var(--soft) }
+.tx-account-value > strong {
+ display: block;
+ font-size: 3.68cqw;
+ line-height: 1.2;
+ font-weight: 400;
+ overflow-wrap: anywhere;
+}
+.detail-account > .account-round-icon { width: 11.4cqw; height: 11.4cqw }
+.detail-account .account-round-icon .bank-icon { width: 100%; height: 100%; border-radius: 0 }
+@media (max-width: 350px) {
+ .tx-account-card { padding-inline-end: 3cqw }
+ .tx-account-buttons { gap: 1cqw }
+}
 </style></head><body>
 
 <main>
@@ -1988,11 +2103,20 @@ function moveAccount(id,direction) {
  (buttons.find(b=>Number(b.dataset.orderStep)===direction)||buttons[0])?.focus({preventScroll:true});
 }
 
+function roundedAccountIcon(a) {
+ const bank=resolveBank(a);
+ const icon=bank?bankIcon(a):'<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m2 7 10-5 10 5v2H2zm2 4h3v7H4zm6.5 0h3v7h-3zm6.5 0h3v7h-3zM2 20h20v2H2z"/></svg>';
+ return `<span class="account-round-icon" data-bank="${esc(bank)}">${icon}</span>`;
+}
+function openAccountMovements(id) {
+ openHomeDetail('accounts');
+ showSummaryStatement(id);
+}
 function detailAccountRow(a,index,count) {
  const id=esc(JSON.stringify(String(a.id)));
  const name=esc(a.name);
  return `<article class="detail-account${accountOrdering?' ordering':''}">
-  ${bankIcon(a)}
+  ${roundedAccountIcon(a)}
   <div class="detail-name">${name}<span class="detail-subtext">${esc(a.currency)}</span></div>
   <div class="detail-account-value">
    ${accountOrdering?accountOrderControls(a,index,count):`<div class="detail-account-actions">
@@ -2430,12 +2554,17 @@ function renderTxAccounts(accounts) {
  return `<div class="tx-account-list">${accounts.map((a,index)=>{
   const id=esc(JSON.stringify(String(a.id)));
   const name=esc(a.name);
-  const row=`<button type="button" class="tx-movement tx-account-row" aria-label="Editar cuenta ${name}" onclick="openAccount(${id})">
-   <span class="tx-bank-icon">${bankIcon(a)}</span>
-   <span class="tx-movement-description"><strong>${name}</strong><small>${esc(a.currency)}</small></span>
-   <span class="tx-movement-value"><strong>${overviewAmountsHidden?'••••••':overviewAmount(balance(a),a.currency)}</strong></span>
-  </button>`;
-  return accountOrdering?`<div class="tx-account-order-row">${row}${accountOrderControls(a,index,accounts.length)}</div>`:row;
+  return `<article class="tx-account-card">
+   ${roundedAccountIcon(a)}
+   <button type="button" class="tx-account-title" aria-label="Editar cuenta ${name}" onclick="openAccount(${id})"><strong>${name}</strong><small>${esc(a.currency)}</small></button>
+   <div class="tx-account-value">
+    ${accountOrdering?accountOrderControls(a,index,accounts.length):`<div class="tx-account-buttons">
+     <button type="button" aria-label="Movimientos de ${name}" onclick="openAccountMovements(${id})">${detailIcon('list')}</button>
+     <button type="button" aria-label="Editar cuenta ${name}" onclick="openAccount(${id})">${detailIcon('more')}</button>
+    </div>`}
+    <strong>${overviewAmountsHidden?'••••••':overviewAmount(balance(a),a.currency).replace(/ gs$/,' Gs')}</strong>
+   </div>
+  </article>`;
  }).join('')}</div>`;
 }
 
