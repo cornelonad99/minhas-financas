@@ -202,7 +202,7 @@ svg { width: 20px; height: 20px; flex: 0 0 auto }
 .period .month-label { font-size: 13px; font-weight: 650; line-height: 1.3; text-transform: capitalize; padding: 0 3px }
 #month.month-picker { position: fixed; top: calc(env(safe-area-inset-top) + 54px); left: 50%; transform: translateX(-50%); opacity: 0; pointer-events: none; width: 150px; z-index: 3 }
 #month.month-picker.visible { opacity: 1; pointer-events: auto }
-html[data-section="inicio"], html[data-section="movimentos"] {
+html[data-section="inicio"], html[data-section="movimentos"], html[data-section="presupuesto"] {
   background-color: var(--top-surface);
   overscroll-behavior-y: none;
 }
@@ -843,7 +843,7 @@ html[data-theme="dark"] #modal[data-kind="income"] { --entry-category: #d5a2fc }
 :root { --tx-color: #5312d4; --tx-tint: #ede5fa; --tx-label-color: #5418c5 }
 html[data-tx-view="expense"] { --tx-color: #ed372a; --tx-tint: #fce4e0; --tx-label-color: #b52720 }
 html[data-tx-view="income"] { --tx-color: #41a243; --tx-tint: #e7f4e7; --tx-label-color: #24732a }
-#movimentos {
+:is(#movimentos,#presupuesto) {
   container-type: inline-size;
   background-color: var(--top-surface);
   transition: background-color 190ms ease;
@@ -854,7 +854,7 @@ html[data-tx-view="income"] { --tx-color: #41a243; --tx-tint: #e7f4e7; --tx-labe
   --tx-positive: #2b8934;
   --tx-negative: #d6251a;
 }
-html[data-theme="dark"] #movimentos {
+html[data-theme="dark"] :is(#movimentos,#presupuesto) {
   --tx-surface: var(--surface);
   --tx-ink: var(--ink);
   --tx-muted: var(--muted);
@@ -862,7 +862,7 @@ html[data-theme="dark"] #movimentos {
   --tx-positive: var(--income);
   --tx-negative: var(--expense);
 }
-#movimentos.active {
+:is(#movimentos,#presupuesto).active {
   display: flex !important;
   flex-direction: column;
   min-height: calc(100dvh - var(--nav-height) - env(safe-area-inset-bottom));
@@ -915,7 +915,7 @@ html[data-section="movimentos"] main { padding-bottom: calc(var(--nav-height) + 
 .tx-month { margin: 2.6cqw 6.1cqw 0 }
 .tx-month button { min-height: 9.25cqw; transition: transform 140ms ease }
 .tx-month button svg { width: 3.85cqw; height: 3.85cqw; vertical-align: middle; opacity: .7 }
-#transactionMonth { font-size: 3.45cqw; letter-spacing: .02em; text-transform: capitalize; font-weight: 400; padding: 0 2px }
+:is(#transactionMonth,#budgetMonth) { font-size: 3.45cqw; letter-spacing: .02em; text-transform: capitalize; font-weight: 400; padding: 0 2px }
 .transaction-panel {
   display: flex;
   flex: 1 0 auto;
@@ -995,7 +995,7 @@ html[data-section="movimentos"] main { padding-bottom: calc(var(--nav-height) + 
 .tx-empty img { display: block; width: 58.6cqw; height: auto; margin-bottom: 8cqw }
 .tx-empty strong { font-size: 4.05cqw; font-weight: 400 }
 .tx-empty p { max-width: 78cqw; margin-top: 4.6cqw; color: var(--tx-muted); font-size: 3.15cqw; line-height: 1.26 }
-#transactionViewDialog {
+:is(#transactionViewDialog,#budgetViewDialog) {
   display: none;
   width: min(73vw, 365px);
   padding: clamp(11px, 3.4vw, 17px);
@@ -1007,10 +1007,10 @@ html[data-section="movimentos"] main { padding-bottom: calc(var(--nav-height) + 
   backdrop-filter: blur(21px) saturate(1.45);
   box-shadow: 0 17px 32px #0002, inset 0 0 7px #fff6;
 }
-#transactionViewDialog[open] { display: grid; gap: clamp(6px, 1.8vw, 9px); animation: tx-dialog-in 180ms cubic-bezier(.2,.7,.25,1) both }
-#transactionViewDialog::backdrop { background-color: #0003; animation: tx-shade-in 150ms ease both }
-#transactionViewDialog.is-closing::backdrop { animation: tx-shade-out 120ms ease both }
-#transactionViewDialog button {
+:is(#transactionViewDialog,#budgetViewDialog)[open] { display: grid; gap: clamp(6px, 1.8vw, 9px); animation: tx-dialog-in 180ms cubic-bezier(.2,.7,.25,1) both }
+:is(#transactionViewDialog,#budgetViewDialog)::backdrop { background-color: #0003; animation: tx-shade-in 150ms ease both }
+:is(#transactionViewDialog,#budgetViewDialog).is-closing::backdrop { animation: tx-shade-out 120ms ease both }
+:is(#transactionViewDialog,#budgetViewDialog) button {
   display: grid;
   place-items: center;
   border: 0;
@@ -1023,9 +1023,9 @@ html[data-section="movimentos"] main { padding-bottom: calc(var(--nav-height) + 
   padding: 0 6px;
   transition: transform 140ms ease, background-color 140ms ease;
 }
-#transactionViewDialog button:active { background: #68686854; transform: scale(.975) }
-html[data-theme="dark"] #transactionViewDialog { background: #272331d9; color: var(--ink); border-color: #fff3 }
-html[data-theme="dark"] #transactionViewDialog button { background: #ffffff19 }
+:is(#transactionViewDialog,#budgetViewDialog) button:active { background: #68686854; transform: scale(.975) }
+html[data-theme="dark"] :is(#transactionViewDialog,#budgetViewDialog) { background: #272331d9; color: var(--ink); border-color: #fff3 }
+html[data-theme="dark"] :is(#transactionViewDialog,#budgetViewDialog) button { background: #ffffff19 }
 @keyframes tx-dialog-in { from { opacity: 0; transform: scale(.91) } to { opacity: 1; transform: scale(1) } }
 @keyframes tx-shade-in { from { opacity: 0 } to { opacity: 1 } }
 @keyframes tx-shade-out { from { opacity: 1 } to { opacity: 0 } }
@@ -1077,7 +1077,7 @@ html[data-section="movimentos"] .quick-close { background: var(--tx-color) }
 #quickMenu[open] { animation: tx-dialog-in 180ms cubic-bezier(.2,.7,.25,1) both }
 #quickMenu::backdrop { animation: tx-shade-in 150ms ease both }
 @media (prefers-reduced-motion: reduce) {
-  #movimentos *, nav *, nav::before, #transactionViewDialog, #transactionViewDialog::backdrop, #quickMenu, #quickMenu::backdrop {
+  #movimentos *, nav *, nav::before, :is(#transactionViewDialog,#budgetViewDialog), :is(#transactionViewDialog,#budgetViewDialog)::backdrop, #quickMenu, #quickMenu::backdrop {
     animation-duration: .001ms !important;
     transition-duration: .001ms !important;
   }
@@ -1479,6 +1479,22 @@ html[data-theme="dark"] #movimentos[data-view="accounts"] {
 .home-editor-switch input:checked + span::after { transform: translateX(20px) }
 .home-editor-switch:focus-within { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 100px }
 @media (prefers-reduced-motion: reduce) { .home-editor-switch > span,.home-editor-switch > span::after { transition: none } }
+
+html[data-section="presupuesto"] { --top-surface: #5312d4 }
+html[data-section="presupuesto"] main { padding-bottom: calc(var(--nav-height) + env(safe-area-inset-bottom)) }
+#presupuesto { container-type: inline-size; --tx-surface: #fbfbfb; --tx-ink: #101011; --tx-muted: #6b6a6a; --tx-divider: #dedede }
+#presupuesto [hidden] { display: none !important }
+#presupuesto .budget-actions { margin: 4cqw 0 2cqw }
+#presupuesto .budget-actions h2 { font-size: 3.4cqw; font-weight: 400 }
+#presupuesto .weekly-budget { border: 1px solid var(--tx-divider); border-radius: 4cqw; padding: 4cqw; margin-bottom: 3cqw }
+#presupuesto .weekly-header strong, #presupuesto .weekly-remaining, #presupuesto .weekly-expense strong { font-weight: 400 }
+.fixed-row { display: grid; grid-template-columns: 8cqw minmax(0,1fr) minmax(0,auto); gap: 2cqw; padding: 4cqw 0; border-bottom: 1px solid var(--tx-divider) }
+.fixed-row h3, .fixed-amount { margin: 0; font-size: 3.15cqw; font-weight: 400; overflow-wrap: anywhere }
+.fixed-row p { margin: 1.5cqw 0; font-size: 2.8cqw; color: var(--tx-muted) }
+.fixed-row .actions { grid-column: 1 / -1; margin-top: 1cqw }
+.fixed-amount { text-align: right }
+#budgetSummary { gap: 2cqw }
+#budgetSummary .tx-summary-cell { border: 0; padding: 0 }
 </style></head><body>
 
 <main>
@@ -1667,9 +1683,25 @@ html[data-theme="dark"] #movimentos[data-view="accounts"] {
   </div>
 </section>
 
-<section id="presupuesto" class="tab">
-  <div class="screen-header"><h1>Presupuesto</h1></div>
-  <div class="screen-body"><div class="section-line"><h2>Límites de gastos semanales</h2><button type="button" class="btn" onclick="openWeeklyLimit()">+ Límite</button></div><div class="card weekly-card"><p class="note">Cada límite dura 7 días desde su creación y se controla por separado de los movimientos y saldos de las cuentas.</p><div id="weeklyLimits"></div></div></div>
+<section id="presupuesto" class="tab" aria-label="Presupuesto">
+  <header class="tx-header">
+    <div class="tx-toolbar">
+      <h1><button id="budgetViewButton" class="tx-view-button" type="button" aria-haspopup="dialog" onclick="$('budgetViewDialog').showModal()"><span id="budgetViewText">Presupuesto semanal</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 8 8 8 8-8"/></svg></button></h1>
+      <button id="budgetOptionsButton" class="options-button" type="button" aria-label="Opciones de presupuesto" aria-expanded="false" onclick="toggleBudgetOptions()"><span aria-hidden="true">•••</span></button>
+    </div>
+    <div class="period tx-month">
+      <button type="button" onclick="shiftMonth(-1)" aria-label="Mes anterior"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m15 3-9 9 9 9"/></svg></button>
+      <button type="button" id="budgetMonth" onclick="pickMonth()"></button>
+      <button type="button" onclick="shiftMonth(1)" aria-label="Mes siguiente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m9 3 9 9-9 9"/></svg></button>
+    </div>
+  </header>
+  <div class="transaction-panel">
+    <div id="budgetSummary" class="transaction-summary"></div>
+    <div id="budgetOptions" class="transaction-options hidden"><button type="button" class="btn secondary" onclick="addBudgetItem()">Crear nuevo</button><p class="note">El control semanal es independiente de los saldos. Los gastos fijos se descuentan únicamente al confirmar su pago.</p></div>
+    <div class="section-line budget-actions"><h2 id="budgetHeading">Límites semanales</h2><button id="budgetAdd" type="button" class="btn" onclick="addBudgetItem()">+ Límite</button></div>
+    <div id="weeklyBudgetPane"><p class="note">Cada límite dura 7 días desde su creación y conserva su propio registro de gastos, independientemente del mes seleccionado.</p><div id="weeklyLimits"></div></div>
+    <div id="fixedBudgetPane" hidden><p class="note">Vencimientos hasta el final del mes seleccionado, incluidos los pendientes anteriores. El pago se registra en la fecha de hoy.</p><div id="fixedExpenses"></div></div>
+  </div>
 </section>
 
 <section id="configuraciones" class="tab">
@@ -1710,7 +1742,7 @@ html[data-theme="dark"] #movimentos[data-view="accounts"] {
 </main>
 <nav aria-label="Navegación principal">
   <button type="button" data-tab="inicio"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg><span>principal</span></button><button type="button" data-tab="movimentos"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="3.5" cy="6" r=".8"/><circle cx="3.5" cy="12" r=".8"/><circle cx="3.5" cy="18" r=".8"/></svg><span>Transacciones</span></button>
-  <button type="button" class="quick-button" aria-label="Nuevo movimiento" onclick="$('quickMenu').showModal()"><span aria-hidden="true">+</span></button>
+  <button type="button" class="quick-button" aria-label="Nuevo movimiento" onclick="openMainAdd()"><span aria-hidden="true">+</span></button>
   <button type="button" data-tab="presupuesto"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 3v19m4-17h13l-2 4.5L21 14H8z"/></svg><span>Presupuesto</span></button><button type="button" data-tab="ajustes"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="4" cy="12" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="20" cy="12" r="1.5" fill="currentColor"/></svg><span>Más</span></button>
 </nav>
 <dialog id="transactionViewDialog" aria-label="Seleccionar vista de transacciones">
@@ -1719,6 +1751,8 @@ html[data-theme="dark"] #movimentos[data-view="accounts"] {
   <button type="button" onclick="closeTransactionView('accounts')">Cuentas</button>
   <button type="button" onclick="closeTransactionView()">Cancelar</button>
 </dialog>
+<dialog id="budgetViewDialog" aria-label="Seleccionar vista de presupuesto"><button type="button" onclick="closeBudgetView('weekly')">Presupuesto semanal</button><button type="button" onclick="closeBudgetView('fixed')">Gastos fijos</button><button type="button" onclick="closeBudgetView()">Cancelar</button></dialog>
+<dialog id="fixedExpenseDialog" class="weekly-dialog" aria-labelledby="fixedExpenseTitle"><form id="fixedExpenseForm"><h2 id="fixedExpenseTitle">Nuevo gasto fijo</h2><div id="fixedExpenseFields"></div><div class="actions"><button type="button" class="btn secondary" onclick="$('fixedExpenseDialog').close()">Cancelar</button><button type="submit" class="btn">Guardar</button></div></form></dialog>
 <dialog id="quickMenu" aria-label="Nuevo movimiento">
   <div class="quick-actions">
     <button type="button" class="quick-transfer" onclick="quickAction('transfer')"><span aria-hidden="true">⇄</span>Transferencia</button>
@@ -1742,7 +1776,7 @@ function setTheme(value){try{localStorage.setItem(THEME_KEY,value)}catch{}applyT
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',applyTheme);
 applyTheme();
 const isRealized = transaction => transaction.type==='transfer'||transaction.realized!==false;
-const KEY='minhas_financas_v1';const defaults={accounts:[],transactions:[],categories:[{name:'Salário',type:'income'},{name:'Atendimentos',type:'income'},{name:'Outras receitas',type:'income'},{name:'Alimentação',type:'expense'},{name:'Transporte',type:'expense'},{name:'Moradia',type:'expense'},{name:'Saúde',type:'expense'},{name:'Lazer',type:'expense'},{name:'Compras',type:'expense'},{name:'Outras despesas',type:'expense'}]};let db;try{db=JSON.parse(localStorage.getItem(KEY))||structuredClone(defaults)}catch{db=structuredClone(defaults)}if(!Array.isArray(db.weeklyBudgets))db.weeklyBudgets=[];let mode='',editing=null;const $=id=>document.getElementById(id),uid=()=>crypto.randomUUID?.()||String(Date.now()+Math.random()),today=()=>new Date().toLocaleDateString('en-CA'),monthNow=()=>today().slice(0,7),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),money=(n,c)=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:c,maximumFractionDigits:c==='PYG'?0:2}).format(n||0),save=()=>{try{localStorage.setItem(KEY,JSON.stringify(db))}catch{alert('No se pudo guardar. Comprueba el espacio de almacenamiento disponible.')}render()},toast=s=>{let t=$('toast');t.textContent=s;t.style.display='block';setTimeout(()=>t.style.display='none',2500)},account=id=>db.accounts.find(a=>a.id===id),balance=a=>Number(a.initial||0)+db.transactions.reduce((sum,t)=>{
+const KEY='minhas_financas_v1';const defaults={accounts:[],transactions:[],categories:[{name:'Salário',type:'income'},{name:'Atendimentos',type:'income'},{name:'Outras receitas',type:'income'},{name:'Alimentação',type:'expense'},{name:'Transporte',type:'expense'},{name:'Moradia',type:'expense'},{name:'Saúde',type:'expense'},{name:'Lazer',type:'expense'},{name:'Compras',type:'expense'},{name:'Outras despesas',type:'expense'}]};let db;try{db=JSON.parse(localStorage.getItem(KEY))||structuredClone(defaults)}catch{db=structuredClone(defaults)}if(!Array.isArray(db.weeklyBudgets))db.weeklyBudgets=[];if(!Array.isArray(db.fixedExpenses))db.fixedExpenses=[];let mode='',editing=null;const $=id=>document.getElementById(id),uid=()=>crypto.randomUUID?.()||String(Date.now()+Math.random()),today=()=>new Date().toLocaleDateString('en-CA'),monthNow=()=>today().slice(0,7),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),money=(n,c)=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:c,maximumFractionDigits:c==='PYG'?0:2}).format(n||0),save=()=>{try{localStorage.setItem(KEY,JSON.stringify(db))}catch{alert('No se pudo guardar. Comprueba el espacio de almacenamiento disponible.')}render()},toast=s=>{let t=$('toast');t.textContent=s;t.style.display='block';setTimeout(()=>t.style.display='none',2500)},account=id=>db.accounts.find(a=>a.id===id),balance=a=>Number(a.initial||0)+db.transactions.reduce((sum,t)=>{
  if(!isRealized(t))return sum;
  const debit=t.accountId===a.id ? (t.type==='income'?+t.amount:t.type==='expense'||t.type==='transfer'?-t.amount:0) : 0;
  const credit=t.toAccountId===a.id&&t.type==='transfer'?+t.amount:0;
@@ -2730,6 +2764,7 @@ function render() {
  }).join('');
  $('categories').innerHTML = db.categories.map(x=>`<div class="row"><span>${esc(categoryLabel(x.name,x.type))} <span class="badge">${typeLabels[x.type]}</span></span><button type="button" class="btn secondary compact" onclick="removeCategory('${encodeURIComponent(x.name)}','${x.type}')">Eliminar</button></div>`).join('');
  renderWeeklyLimits();
+ renderBudget();
  if($('cierre').classList.contains('active'))renderMonthlyClosing(isClosingDate(month+'-01')?month:monthNow(),sorted);
  void refreshRealQuote();
 }
@@ -3073,7 +3108,7 @@ function deleteCurrent(){if(!editing||!confirm('¿Eliminar este registro?'))retu
 function addCategory(){let name=$('newCategory').value.trim(),type=$('newCategoryType').value;if(!name)return;if(db.categories.some(c=>c.name.toLowerCase()===name.toLowerCase()&&c.type===type))return toast('La categoría ya existe');db.categories.push({name,type});$('newCategory').value='';save()}
 function removeCategory(name,type){name=decodeURIComponent(name);if(db.transactions.some(t=>t.category===name&&t.type===type))return alert('Esta categoría está en uso.');if(confirm('¿Eliminar la categoría?')){db.categories=db.categories.filter(c=>!(c.name===name&&c.type===type));save()}}
 function exportData(){const blob=new Blob([JSON.stringify({app:'minhas-financas',version:1,exportedAt:new Date().toISOString(),data:db},null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='minhas-financas-backup-'+today()+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
-async function importData(e){const file=e.target.files[0];if(!file)return;try{let parsed=JSON.parse(await file.text());if(parsed.app!=='minhas-financas'||!Array.isArray(parsed.data?.accounts)||!Array.isArray(parsed.data?.transactions)||!Array.isArray(parsed.data?.categories))throw Error('Formato inválido');if(!confirm('¿Reemplazar todos los datos actuales por los de la copia de seguridad?'))return;db=parsed.data;if(!Array.isArray(db.weeklyBudgets))db.weeklyBudgets=[];save();toast('Copia de seguridad restaurada')}catch(err){alert('No se pudo restaurar: '+err.message)}finally{e.target.value=''}}
+async function importData(e){const file=e.target.files[0];if(!file)return;try{let parsed=JSON.parse(await file.text());if(parsed.app!=='minhas-financas'||!Array.isArray(parsed.data?.accounts)||!Array.isArray(parsed.data?.transactions)||!Array.isArray(parsed.data?.categories))throw Error('Formato inválido');if(!confirm('¿Reemplazar todos los datos actuales por los de la copia de seguridad?'))return;db=parsed.data;if(!Array.isArray(db.weeklyBudgets))db.weeklyBudgets=[];if(!Array.isArray(db.fixedExpenses))db.fixedExpenses=[];save();toast('Copia de seguridad restaurada')}catch(err){alert('No se pudo restaurar: '+err.message)}finally{e.target.value=''}}
 
 // Importação aditiva e offline de arquivos gerados pelo Atalhos do iOS.
 // Formato de cada arquivo: {"app":"minhas-financas","kind":"pending-expense","id":"...", "valor":100, "conta":"...", "categoria":"...", "descricao":"...", "data":"YYYY-MM-DD"}.
@@ -3214,6 +3249,77 @@ $('weeklyForm').addEventListener('submit',e=>{
 });
 function deleteWeeklyExpense(bid,eid){const b=db.weeklyBudgets.find(x=>x.id===bid);if(!b)return;const x=b.expenses.find(y=>y.id===eid);if(!x||!confirm('¿Eliminar este gasto del control semanal?'))return;b.expenses=b.expenses.filter(y=>y.id!==eid);save()}
 function deleteWeeklyLimit(id){const b=db.weeklyBudgets.find(x=>x.id===id);if(!b||!confirm('¿Eliminar este límite y todos sus gastos semanales? Se conservarán los movimientos y saldos de tus cuentas.'))return;db.weeklyBudgets=db.weeklyBudgets.filter(x=>x.id!==id);save()}
+
+// Presupuesto: límites independientes y vencimientos que requieren confirmar el pago.
+let budgetView='weekly';
+function openMainAdd(){if($('presupuesto').classList.contains('active'))addBudgetItem();else $('quickMenu').showModal()}
+function addBudgetItem(){budgetView==='fixed'?openFixedExpense():openWeeklyLimit()}
+function toggleBudgetOptions(){const el=$('budgetOptions');el.classList.toggle('hidden');$('budgetOptionsButton').setAttribute('aria-expanded',String(!el.classList.contains('hidden')))}
+function closeBudgetView(view){
+ const dialog=$('budgetViewDialog');if(!dialog.open||dialog.classList.contains('is-closing'))return;
+ const finish=()=>{dialog.close();dialog.classList.remove('is-closing');if(view){budgetView=view;renderBudget();playMotion($('presupuesto').querySelector('.transaction-panel'),[{opacity:.5,transform:'translateY(7px)'},{opacity:1,transform:'translateY(0)'}],{duration:180,easing:'ease-out'})}};
+ const anim=playMotion(dialog,[{opacity:1,transform:'scale(1)'},{opacity:0,transform:'scale(.94)'}],{duration:120,easing:'ease-in'});
+ if(!anim){finish();return}dialog.classList.add('is-closing');anim.finished.then(finish,finish);
+}
+$('budgetViewDialog').addEventListener('cancel',e=>{e.preventDefault();closeBudgetView()});
+$('budgetViewDialog').addEventListener('click',e=>{const d=e.currentTarget,r=d.getBoundingClientRect();if(e.target===d&&(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom))closeBudgetView()});
+function budgetMoney(items,amountOf,currencyOf){
+ const sums=new Map();for(const x of items){const c=currencyOf(x);if(!currencies.includes(c))continue;sums.set(c,(sums.get(c)||0)+Number(amountOf(x)||0))}
+ return sums.size?[...sums].map(([c,n])=>overviewAmount(n,c)).join(' · '):'0 gs';
+}
+function fixedVisible(){const month=monthInput.value||monthNow();return db.fixedExpenses.filter(f=>!f.paidAt&&f.dueDate.slice(0,7)<=month).sort((a,b)=>a.dueDate.localeCompare(b.dueDate))}
+function renderBudget(){
+ const fixed=budgetView==='fixed',month=monthInput.value||monthNow();
+ $('budgetViewText').textContent=fixed?'Gastos fijos':'Presupuesto semanal';
+ $('budgetMonth').textContent=overviewMonthFormat.format(new Date(month+'-01T12:00:00'));
+ $('budgetHeading').textContent=fixed?'Vencimientos pendientes':'Límites semanales';$('budgetAdd').textContent=fixed?'+ Gasto fijo':'+ Límite';
+ $('weeklyBudgetPane').hidden=fixed;$('fixedBudgetPane').hidden=!fixed;
+ let cells;
+ if(fixed){const list=fixedVisible(),late=list.filter(f=>f.dueDate<today());cells=[['Pendiente',budgetMoney(list,f=>f.amount,f=>account(f.accountId)?.currency)],['Vencido',budgetMoney(late,f=>f.amount,f=>account(f.accountId)?.currency)]]}
+ else{const active=db.weeklyBudgets.filter(weeklyIsActive);cells=[['Límites en curso',String(active.length)],['Disponible',budgetMoney(active,weeklyRemaining,b=>b.currency)]]}
+ $('budgetSummary').innerHTML=cells.map(([label,value])=>`<div class="tx-summary-cell"><div><span>${esc(label)}</span><strong>${esc(value)}</strong></div></div>`).join('');
+ renderFixedExpenses();
+}
+function renderFixedExpenses(){
+ const month=monthInput.value||monthNow(),paid=db.fixedExpenses.filter(f=>f.paidAt&&f.dueDate.slice(0,7)===month),list=[...fixedVisible(),...paid];
+ $('fixedExpenses').innerHTML=list.length?list.map(f=>{
+  const a=account(f.accountId),late=!f.paidAt&&f.dueDate<today(),id=weeklyEscId(f.id);
+  return `<article class="fixed-row"><span class="tx-category-icon" aria-hidden="true">${entryIcon(f.paidAt?'statusCheck':'statusClock')}</span><div><h3>${esc(f.name)}</h3><p>${esc(a?.name||'Cuenta eliminada')} · ${esc(categoryLabel(f.category,'expense'))}</p><p>${esc(txHeadingDate.format(new Date(f.dueDate+'T12:00:00Z')))} · ${f.paidAt?'Pagado':late?'Vencido':'Pendiente'} · ${f.repeat==='monthly'?'Mensual':'Una sola vez'}</p></div><div class="fixed-amount">${esc(overviewAmount(f.amount,a?.currency||f.currency||'PYG'))}</div><div class="actions">${!f.paidAt?`<button type="button" class="btn" onclick='payFixedExpense(${id},${weeklyEscId(f.dueDate)})' ${a?'':'disabled'}>Marcar como pagado</button><button type="button" class="btn secondary" onclick='openFixedExpense(${id})'>Editar</button>`:''}<button type="button" class="btn secondary" onclick='deleteFixedExpense(${id})'>Eliminar</button></div></article>`;
+ }).join(''):'<div class="empty">No hay gastos fijos pendientes para este mes. Toca + Gasto fijo para crear uno.</div>';
+ const paidTransactions=db.transactions.filter(t=>t.fixedExpenseId&&t.date.startsWith(month));
+ if(paidTransactions.length)$('fixedExpenses').insertAdjacentHTML('beforeend',`<p class="note">Pagados este mes: ${esc(budgetMoney(paidTransactions,t=>t.amount,t=>account(t.accountId)?.currency))}. Puedes consultar y editar los pagos en Transacciones → Gastos.</p>`);
+}
+function openFixedExpense(id){
+ if(!db.accounts.length){alert('Crea una cuenta antes de registrar un gasto fijo.');return}
+ const f=db.fixedExpenses.find(x=>x.id===id);if(f?.paidAt)return;
+ const cats=db.categories.filter(c=>c.type==='expense').map(c=>c.name);if(f?.category&&!cats.includes(f.category))cats.push(f.category);if(!cats.length)cats.push('Outras despesas');
+ $('fixedExpenseTitle').textContent=f?'Editar gasto fijo':'Nuevo gasto fijo';
+ $('fixedExpenseFields').innerHTML=`<input id="fixedId" type="hidden" value="${esc(f?.id||'')}"><label for="fixedName">Nombre</label><input id="fixedName" required maxlength="100" placeholder="Ej.: Alquiler, Internet" value="${esc(f?.name||'')}"><label for="fixedAccount">Cuenta de pago</label><select id="fixedAccount" required>${db.accounts.map(a=>`<option value="${esc(a.id)}" ${a.id===f?.accountId?'selected':''}>${esc(a.name)} · ${esc(a.currency)}</option>`).join('')}</select><label for="fixedAmount">Importe (en la moneda de la cuenta)</label><input id="fixedAmount" type="number" inputmode="decimal" min="0.01" step="0.01" required value="${esc(f?.amount??'')}"><label for="fixedCategory">Categoría</label><select id="fixedCategory">${cats.map(c=>`<option value="${esc(c)}" ${c===f?.category?'selected':''}>${esc(categoryLabel(c,'expense'))}</option>`).join('')}</select><label for="fixedDate">Fecha a pagar</label><input id="fixedDate" type="date" required value="${esc(f?.dueDate||today())}"><label for="fixedRepeat">Repetición</label><select id="fixedRepeat"><option value="monthly" ${f?.repeat!=='once'?'selected':''}>Cada mes</option><option value="once" ${f?.repeat==='once'?'selected':''}>Una sola vez</option></select><p class="note">No se descontará automáticamente. Al confirmar el pago se creará un gasto realizado en la cuenta elegida. Si es mensual, se preparará el siguiente vencimiento.</p>`;
+ $('fixedExpenseDialog').showModal();
+}
+function commitFixedData(next){try{localStorage.setItem(KEY,JSON.stringify(next))}catch{alert('No se pudo guardar. Comprueba el espacio de almacenamiento disponible.');return false}db=next;render();return true}
+function saveFixedExpense(e){
+ e.preventDefault();const id=$('fixedId').value,existing=db.fixedExpenses.find(f=>f.id===id),a=account($('fixedAccount').value),amount=Number($('fixedAmount').value),date=$('fixedDate').value,name=$('fixedName').value.trim();
+ if(id&&!existing){alert('Este gasto fijo ya no existe.');return}
+ if(!a||!name||!Number.isFinite(amount)||amount<=0||!isClosingDate(date)){alert('Completa un nombre, cuenta, importe y fecha válidos.');return}
+ const f={...existing,id:existing?.id||uid(),name,accountId:a.id,currency:a.currency,amount,category:$('fixedCategory').value,dueDate:date,repeat:$('fixedRepeat').value,anchorDay:existing?.dueDate===date?existing.anchorDay||Number(date.slice(-2)):Number(date.slice(-2))};
+ const next={...db,fixedExpenses:existing?db.fixedExpenses.map(x=>x.id===id?f:x):[...db.fixedExpenses,f]};
+ if(commitFixedData(next)){$('fixedExpenseDialog').close();toast('Gasto fijo guardado')}
+}
+$('fixedExpenseForm').addEventListener('submit',saveFixedExpense);
+function nextFixedDate(date,day){const [y,m]=date.split('-').map(Number),first=new Date(Date.UTC(y,m,1)),last=new Date(Date.UTC(y,m+1,0)).getUTCDate();return first.getUTCFullYear()+'-'+String(first.getUTCMonth()+1).padStart(2,'0')+'-'+String(Math.min(day,last)).padStart(2,'0')}
+function payFixedExpense(id,dueDate){
+ const f=db.fixedExpenses.find(x=>x.id===id);if(!f||f.paidAt||f.dueDate!==dueDate)return;
+ const a=account(f.accountId);if(!a){alert('Selecciona una cuenta disponible antes de pagar.');return}
+ const paymentId='fixed:'+id+':'+dueDate;
+ if(db.transactions.some(t=>t.id===paymentId)){alert('Este vencimiento ya tiene un pago registrado.');return}
+ if(!confirm(`¿Confirmar el pago de ${overviewAmount(f.amount,a.currency)} por ${f.name}? Se descontará de ${a.name} y se registrará con fecha de hoy.`))return;
+ const paidDate=today(),transaction={id:paymentId,type:'expense',accountId:a.id,amount:f.amount,date:paidDate,category:f.category,description:f.name,realized:true,created:new Date().toISOString(),fixedExpenseId:id,fixedDueDate:dueDate};
+ const updated=f.repeat==='monthly'?{...f,dueDate:nextFixedDate(dueDate,f.anchorDay||Number(dueDate.slice(-2)))}:{...f,paidAt:paidDate};
+ const next={...db,transactions:[...db.transactions,transaction],fixedExpenses:db.fixedExpenses.map(x=>x.id===id?updated:x)};
+ if(commitFixedData(next))toast('Pago registrado en Gastos');
+}
+function deleteFixedExpense(id){const f=db.fixedExpenses.find(x=>x.id===id);if(!f||!confirm('¿Eliminar este gasto fijo y sus próximos vencimientos? Los pagos registrados se conservarán en Transacciones.'))return;if(commitFixedData({...db,fixedExpenses:db.fixedExpenses.filter(x=>x.id!==id)}))toast('Gasto fijo eliminado')}
 
 window.addEventListener('online',refreshRealQuote);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)void refreshRealQuote()});
