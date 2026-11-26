@@ -1513,6 +1513,14 @@ html[data-section="presupuesto"] main { padding-bottom: calc(var(--nav-height) +
 #quickMenu {width:min(100%,390px);bottom:calc(30px + env(safe-area-inset-bottom))} #quickMenu::backdrop{background:rgba(0,0,0,.80)}
 .quick-actions{position:relative;display:block;height:150px;padding:0;min-height:0}.quick-actions button{position:absolute;transform:translateX(-50%);font-size:12px;white-space:nowrap}.quick-actions button span{background:white;width:46px;height:46px;font-size:25px}.quick-actions .quick-income{left:38%;top:0}.quick-actions .quick-pending{left:62%;top:0}.quick-actions .quick-transfer{left:23%;top:76px}.quick-actions .quick-expense{left:77%;top:76px}.quick-actions .quick-transfer span{color:#2196ff}
 #pendingList{position:fixed;inset:0;margin:auto;width:100%;max-width:100%;height:100dvh;max-height:100dvh;padding:0;border:0;border-radius:0;background:#f8f8f8;color:#151515;container-type:inline-size;--tx-muted:#777;--tx-divider:#ddd;overflow:auto}#pendingList::backdrop{background:#f28b24}#pendingList button{margin:0} .pending-head{background:#f28b24;color:white;padding:calc(env(safe-area-inset-top) + 20px) 5% 24px}.pending-toolbar,.pending-month{display:flex;align-items:center;justify-content:space-between}.pending-toolbar button,.pending-month button{border:0;background:transparent;color:white;font-size:25px;padding:8px}.pending-title{background:#c66a12;border-radius:30px;padding:10px 22px;font-size:17px}.pending-month{margin-top:20px;font-size:17px;text-transform:capitalize}.pending-sheet{border-radius:25px 25px 0 0;background:#f8f8f8;margin-top:-12px;position:relative;padding:0 4.55cqw 100px;min-height:65vh}.pending-sheet strong.orange{color:#d97706}.pending-sheet .tx-category-icon{background:white;color:#d97706}.pending-footer{position:sticky;bottom:0;display:flex;justify-content:center;background:white;padding:8px 0 calc(12px + env(safe-area-inset-bottom));margin-top:-75px}.pending-footer button{background:#f28b24;color:white;border:0;border-radius:50%;width:49px;height:49px;font-size:32px}.pending-empty{padding:45px 0;text-align:center;color:#777}html[data-theme="dark"] #pendingList,html[data-theme="dark"] .pending-sheet,html[data-theme="dark"] .pending-footer{background:#202024;color:#eee}
+
+/* Pending screens: consistent safe-area and footer colors. */
+html:has(#pendingList[open]), html:has(#modal[open][data-kind="pending"]) { --top-surface: #f28b24; background-color: #f28b24; }
+#pendingList { --pending-surface: #fff; background: var(--pending-surface); }
+#pendingList .pending-sheet, #pendingList .pending-footer { background: var(--pending-surface); }
+#pendingList .pending-footer { box-shadow: none; border: 0; }
+#modal[data-kind="pending"]::backdrop { background: #f28b24; }
+html[data-theme="dark"] #pendingList { --pending-surface: #202024; }
 </style></head><body>
 
 <main>
@@ -1791,13 +1799,16 @@ html[data-section="presupuesto"] main { padding-bottom: calc(var(--nav-height) +
 const THEME_KEY='minhas_financas_theme_v2';
 const topColorMeta=document.querySelector('meta[name="theme-color"]');
 function syncTopColor() {
- const color=getComputedStyle(document.documentElement).getPropertyValue('--top-surface').trim();
+ const pendingOpen=document.querySelector('#pendingList[open], #modal[open][data-kind="pending"]');
+ const color=pendingOpen?'#f28b24':getComputedStyle(document.documentElement).getPropertyValue('--top-surface').trim();
  if(color&&topColorMeta.content!==color)topColorMeta.content=color;
 }
 function applyTheme(){const choice=localStorage.getItem(THEME_KEY)||'auto';const dark=choice==='dark'||(choice==='auto'&&window.matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.dataset.theme=dark?'dark':'light';syncTopColor();document.querySelectorAll('[data-theme-choice]').forEach(b=>{const selected=b.dataset.themeChoice===choice;b.classList.toggle('selected',selected);b.setAttribute('aria-pressed',String(selected))});const label=document.getElementById('themeStatus');if(label)label.textContent=choice==='auto'?'Sigue la apariencia del iPhone.':choice==='dark'?'Modo oscuro activado.':'Modo claro activado.'}
 function setTheme(value){try{localStorage.setItem(THEME_KEY,value)}catch{}applyTheme()}
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',applyTheme);
 applyTheme();
+const pendingColorObserver = new MutationObserver(syncTopColor);
+for (const id of ['pendingList','modal']) pendingColorObserver.observe(document.getElementById(id), {attributes:true,attributeFilter:['open','data-kind']});
 const isRealized = transaction => transaction.type==='transfer'||transaction.realized!==false;
 const KEY='minhas_financas_v1';const defaults={accounts:[],transactions:[],categories:[{name:'Salário',type:'income'},{name:'Atendimentos',type:'income'},{name:'Outras receitas',type:'income'},{name:'Alimentação',type:'expense'},{name:'Transporte',type:'expense'},{name:'Moradia',type:'expense'},{name:'Saúde',type:'expense'},{name:'Lazer',type:'expense'},{name:'Compras',type:'expense'},{name:'Outras despesas',type:'expense'}]};let db;try{db=JSON.parse(localStorage.getItem(KEY))||structuredClone(defaults)}catch{db=structuredClone(defaults)}if(!Array.isArray(db.weeklyBudgets))db.weeklyBudgets=[];if(!Array.isArray(db.fixedExpenses))db.fixedExpenses=[];let mode='',editing=null;const $=id=>document.getElementById(id),uid=()=>crypto.randomUUID?.()||String(Date.now()+Math.random()),today=()=>new Date().toLocaleDateString('en-CA'),monthNow=()=>today().slice(0,7),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),money=(n,c)=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:c,maximumFractionDigits:c==='PYG'?0:2}).format(n||0),save=()=>{try{localStorage.setItem(KEY,JSON.stringify(db))}catch{alert('No se pudo guardar. Comprueba el espacio de almacenamiento disponible.')}render()},toast=s=>{let t=$('toast');t.textContent=s;t.style.display='block';setTimeout(()=>t.style.display='none',2500)},account=id=>db.accounts.find(a=>a.id===id),balance=a=>Number(a.initial||0)+db.transactions.reduce((sum,t)=>{
  if(!isRealized(t))return sum;
