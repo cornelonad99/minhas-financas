@@ -1,4 +1,4 @@
-<!doctype html><html lang="es-PY"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#ffffff"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon-192.png"><title>Mis Finanzas</title><style>
+<!doctype html><html lang="es-PY"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#ffffff"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon-192.png"><title>Mis Finanzas</title><style>
 /* Rubik. Copyright (c) 2015 by Hubert & Fischer. All rights reserved. Hebrew characters (c) 2016 by Meir Sadan.
 -----------------------------------------------------------
 SIL OPEN FONT LICENSE Version 1.1 - 26 February 2007
@@ -1521,6 +1521,13 @@ html:has(#pendingList[open]), html:has(#modal[open][data-kind="pending"]) { --to
 #pendingList .pending-footer { box-shadow: none; border: 0; }
 #modal[data-kind="pending"]::backdrop { background: #f28b24; }
 html[data-theme="dark"] #pendingList { --pending-surface: #202024; }
+
+/* iOS installed PWA: draw the header behind the native status bar. */
+html[data-pending-status="true"] { --top-surface: #f28b24 !important; background: #f28b24 !important; }
+html[data-pending-status="true"] body { background-color: #f28b24; }
+#pendingList[open], #modal[open][data-kind="pending"] { top: 0; bottom: auto; margin-block: 0; height: 100dvh; max-height: none; }
+#pendingList .pending-head { padding-top: calc(env(safe-area-inset-top, 0px) + 20px); }
+#modal[data-kind="pending"] .entry-hero { padding-top: max(14.1cqw, calc(env(safe-area-inset-top, 0px) + 20px)); }
 </style></head><body>
 
 <main>
@@ -1800,6 +1807,8 @@ const THEME_KEY='minhas_financas_theme_v2';
 const topColorMeta=document.querySelector('meta[name="theme-color"]');
 function syncTopColor() {
  const pendingOpen=document.querySelector('#pendingList[open], #modal[open][data-kind="pending"]');
+ document.documentElement.toggleAttribute('data-pending-active', !!pendingOpen);
+ document.documentElement.dataset.pendingStatus = pendingOpen ? 'true' : 'false';
  const color=pendingOpen?'#f28b24':getComputedStyle(document.documentElement).getPropertyValue('--top-surface').trim();
  if(color&&topColorMeta.content!==color)topColorMeta.content=color;
 }
