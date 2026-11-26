@@ -1719,8 +1719,12 @@ html[data-section="presupuesto"] main { padding-bottom: calc(var(--nav-height) +
  <div class="screen-header"><button class="back" type="button" aria-label="Volver a Más" onclick="show('ajustes')">‹</button><h1>Configuraciones</h1></div>
  <div class="screen-body"><div class="card menu-list">
   <button type="button" onclick="show('editarInicio')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7v11H3zM9 21v-7h6v7"/></svg><span>Editar pantalla de inicio</span><span aria-hidden="true">›</span></button>
+  <button type="button" onclick="show('categorySettings')"> <span>🏷️</span><span>Categorías de gastos e ingresos</span><span>›</span></button>
  </div></div>
 </section>
+<section id="categorySettings" class="tab">
+<div class="screen-header"><button class="back" type="button" onclick="show('configuraciones')">‹</button><h1>Categorías</h1></div>
+<div class="screen-body"><div class="card"><div id="categories"></div></div><div class="card"><h2 id="categoryFormTitle">Nueva categoría</h2><label for="newCategory">Nombre</label><input id="newCategory" maxlength="80" placeholder="Ej.: Gimnasio"><label for="newCategoryType">Tipo</label><select id="newCategoryType"><option value="expense">Gasto</option><option value="income">Ingreso</option></select><label for="categoryIcon">Icono</label><select id="categoryIcon"></select><label for="categoryColor">Color</label><input id="categoryColor" type="color" value="#bf0008"><div class="actions"><button class="btn" onclick="addCategory()">Guardar</button><button class="btn secondary" onclick="resetCategoryEditor()">Cancelar</button></div></div></div></section>
 <section id="editarInicio" class="tab">
  <div class="screen-header"><button class="back" type="button" aria-label="Volver a Configuraciones" onclick="show('configuraciones')">‹</button><h1>Editar pantalla de inicio</h1></div>
  <div class="screen-body">
@@ -1744,7 +1748,7 @@ html[data-section="presupuesto"] main { padding-bottom: calc(var(--nav-height) +
       <button type="button" onclick="show('cierre')"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V11m5 9V5m5 15v-7m5 7V8"/><path d="M2 21h20"/></svg><span>Cierre mensual</span><span aria-hidden="true">›</span></button>
     </div>
     <div class="card"><h2>Apariencia</h2><div class="theme-choice" aria-label="Tema del app"><button type="button" data-theme-choice="light" onclick="setTheme('light')">Claro</button><button type="button" data-theme-choice="dark" onclick="setTheme('dark')">Oscuro</button><button type="button" data-theme-choice="auto" onclick="setTheme('auto')">Automático</button></div><p id="themeStatus" class="note theme-status"></p></div>
-    <div class="card"><h2>Categorías</h2><div id="categories"></div><label for="newCategory">Nueva categoría</label><div class="inline"><input id="newCategory" placeholder="Ej.: Gimnasio"><select id="newCategoryType" aria-label="Tipo de categoría"><option value="expense">Gasto</option><option value="income">Ingreso</option></select></div><div class="actions"><button class="btn" type="button" onclick="addCategory()">Añadir</button></div></div>
+
     <div class="card"><h2>Copia de seguridad</h2><p class="note">Tus datos se guardan únicamente en este navegador y dispositivo. Haz copias de seguridad con frecuencia. Si borras los datos de Safari, cambias de dispositivo o eliminas el sitio, puedes perder tus registros.</p><div class="actions"><button class="btn" type="button" onclick="exportData()">Exportar copia</button><button class="btn secondary" type="button" onclick="$('importFile').click()">Restaurar copia</button></div><input id="importFile" type="file" accept="application/json,.json" class="hidden" onchange="importData(event)"></div>
     <div class="card"><h2>Acerca de</h2><p class="note">Aplicación personal gratuita. Si la instalas mediante HTTPS, funciona sin conexión después de abrirla por primera vez. No incluye sincronización, gestión de tarjetas de crédito ni conversión automática de monedas.</p></div>
   </div>
@@ -2395,7 +2399,7 @@ function renderExpenseCharts(month) {
  renderQuoteNote($('chartQuote'),view==='TOTAL');
  const items=sortedChartItems(data,$('chartSort').value||'desc');
  $('chartList').innerHTML=items.map(item=>{
-  const icon=item.account?bankIcon(item.account):entryIcon(/alimenta/.test(normalizeDetailText(item.label))?'categoryExpense':type==='income'?'categoryIncome':'category');
+  const icon=item.account?bankIcon(item.account):customCategoryIcon(item.key,type,entryIcon(/alimenta/.test(normalizeDetailText(item.label))?'categoryExpense':type==='income'?'categoryIncome':'category'));
   return `<div class="chart-list-row"><span class="chart-list-icon" style="--segment:${item.color}">${icon}</span><span class="chart-list-label">${esc(item.label)}<small>Porcentaje</small></span><span class="chart-list-value ${type==='income'?'income':''}">${chartAmount(item.amount,data.currency)}<small>${(item.amount/data.total*100).toFixed(2)}%</small></span></div>`;
  }).join('');
 }
@@ -2436,7 +2440,7 @@ function transactionRow(t,showType=false) {
  const symbol = t.type==='transfer'?'⇄':t.type==='income'?'↑':'↓';
  const sign = t.type==='transfer'?'':t.type==='income'?'+':'−';
  const id = esc(JSON.stringify(String(t.id)));
- return `<div class="row transaction-row"><span class="type-icon ${t.type}" aria-hidden="true">${symbol}</span><div class="transaction-text"><strong>${esc(label)}</strong>${t.favorite?'<span class="badge" aria-label="Favorito">♥</span>':''}${!isRealized(t)?'<span class="badge">Pendiente</span>':''}<div class="muted">${showType===true&&typeLabels[t.type]?typeLabels[t.type]+' · ':''}${esc(t.date)} · ${esc(a?.name||'Cuenta eliminada')}${t.description&&t.category?' · '+esc(categoryLabel(t.category,t.type)):''}</div></div><div class="right"><strong class="${t.type==='income'?'green':t.type==='expense'?'red':''}">${sign}${money(t.amount,currency)}</strong><button class="link-button" type="button" onclick="${edit}(${id})">Editar</button></div></div>`;
+ return `<div class="row transaction-row"><span class="type-icon ${t.type}" style="${categoryStyle(t.category,t.type)}" aria-hidden="true">${customCategoryIcon(t.category,t.type,symbol)}</span><div class="transaction-text"><strong>${esc(label)}</strong>${t.favorite?'<span class="badge" aria-label="Favorito">♥</span>':''}${!isRealized(t)?'<span class="badge">Pendiente</span>':''}<div class="muted">${showType===true&&typeLabels[t.type]?typeLabels[t.type]+' · ':''}${esc(t.date)} · ${esc(a?.name||'Cuenta eliminada')}${t.description&&t.category?' · '+esc(categoryLabel(t.category,t.type)):''}</div></div><div class="right"><strong class="${t.type==='income'?'green':t.type==='expense'?'red':''}">${sign}${money(t.amount,currency)}</strong><button class="link-button" type="button" onclick="${edit}(${id})">Editar</button></div></div>`;
 }
 const closingDateFormat = new Intl.DateTimeFormat('es-PY',{dateStyle:'short',timeZone:'UTC'});
 
@@ -2597,7 +2601,7 @@ function renderTransactionMovement(t) {
  const edit=type==='transfer'?'openTransfer':'openTransaction';
 
  return `<button type="button" class="tx-movement" onclick="${edit}(${id})">
-  <span class="tx-category-icon ${type}">${entryIcon(categoryIcon)}</span>
+  <span class="tx-category-icon ${type}" style="${categoryStyle(t.category,type)}">${customCategoryIcon(t.category,type,entryIcon(categoryIcon))}</span>
   <span class="tx-movement-description"><strong>${esc(title)}${t.favorite?' <span aria-label="Favorito">♥</span>':''}</strong><small>${esc(description)}</small></span>
   <span class="tx-movement-value"><strong class="${tone}">${overviewAmount(t.amount,a?.currency||destination?.currency||'BRL')}</strong>
    <span class="tx-movement-status${realized?'':' pending'}" title="${realized?'Realizado':'Pendiente'}">
@@ -2774,7 +2778,7 @@ function render() {
   const report = code===currency?totals:monthlyTotals(month,code);
   return `<div class="card"><div class="topline"><h2>Gastos · ${code}</h2><strong>${money(report.expense,code)}</strong></div>${categoryBreakdown(report,code)}</div>`;
  }).join('');
- $('categories').innerHTML = db.categories.map(x=>`<div class="row"><span>${esc(categoryLabel(x.name,x.type))} <span class="badge">${typeLabels[x.type]}</span></span><button type="button" class="btn secondary compact" onclick="removeCategory('${encodeURIComponent(x.name)}','${x.type}')">Eliminar</button></div>`).join('');
+ renderCategorySettings();
  renderWeeklyLimits();
  renderBudget();
  if($('cierre').classList.contains('active'))renderMonthlyClosing(isClosingDate(month+'-01')?month:monthNow(),sorted);
@@ -2787,7 +2791,7 @@ function show(tab) {
  if(previous!==tab)accountOrdering=false;
  document.documentElement.dataset.section=tab;
  document.querySelectorAll('.tab').forEach(section=>section.classList.toggle('active',section.id===tab));
- const activeTab = tab==='graficos'?'inicio':['contas','relatorios','cierre','configuraciones','editarInicio'].includes(tab)?'ajustes':tab;
+ const activeTab = tab==='graficos'?'inicio':['contas','relatorios','cierre','configuraciones','editarInicio','categorySettings'].includes(tab)?'ajustes':tab;
  document.documentElement.dataset.navTab=activeTab;
  document.querySelectorAll('nav [data-tab]').forEach(button=>{
   const active = button.dataset.tab===activeTab;
@@ -2970,7 +2974,7 @@ function renderCategory(current) {
 }
 function updateEntryCategoryLabel() {
  const type = $('fType').value;
- $('entryCategoryIcon').innerHTML = entryIcon(type==='income'?'categoryIncome':'categoryExpense');
+ $('entryCategoryIcon').innerHTML = customCategoryIcon($('fCategory').value,type,entryIcon(type==='income'?'categoryIncome':'categoryExpense'));
  $('entryCategoryText').textContent = categoryLabel($('fCategory').value,type)||'Sin categoría';
 }
 function yesterdayDate() {
@@ -3117,8 +3121,19 @@ function saveForm(e){
  toast('Guardado correctamente');
 }
 function deleteCurrent(){if(!editing||!confirm('¿Eliminar este registro?'))return;if(mode==='account'){if(db.transactions.some(t=>t.accountId===editing||t.toAccountId===editing))return alert('Primero elimina los movimientos de esta cuenta.');db.accounts=db.accounts.filter(a=>a.id!==editing)}else db.transactions=db.transactions.filter(t=>t.id!==editing);$('modal').close();save();toast('Registro eliminado')}
-function addCategory(){let name=$('newCategory').value.trim(),type=$('newCategoryType').value;if(!name)return;if(db.categories.some(c=>c.name.toLowerCase()===name.toLowerCase()&&c.type===type))return toast('La categoría ya existe');db.categories.push({name,type});$('newCategory').value='';save()}
-function removeCategory(name,type){name=decodeURIComponent(name);if(db.transactions.some(t=>t.category===name&&t.type===type))return alert('Esta categoría está en uso.');if(confirm('¿Eliminar la categoría?')){db.categories=db.categories.filter(c=>!(c.name===name&&c.type===type));save()}}
+var categoryEditing=null;
+const categoryIcons=['🏷️','🍔','🛒','🚗','⛽','🏠','💡','💧','📱','🌐','🏥','💊','🏋️','🎓','📚','🎮','🎬','✈️','👕','💇','🐾','🎁','💳','💰','💼','☕','🍽️','🔧','🚌','🛍️','🧾','❤️'];
+function categoryRecord(name,type){return db.categories.find(c=>c.name===name&&c.type===type)}
+function customCategoryIcon(name,type,fallback){const c=categoryRecord(name,type);return c&&categoryIcons.includes(c.icon)?esc(c.icon):fallback;}
+function categoryStyle(name,type){const color=categoryRecord(name,type)?.color;return /^#[0-9a-f]{6}$/i.test(color||'')?'background:'+color:'';}
+function renderCategorySettings(){
+ const picker=$('categoryIcon');if(!picker.options.length)picker.innerHTML=categoryIcons.map(i=>`<option>${i}</option>`).join('');
+ $('categories').innerHTML=db.categories.map((c,i)=>`<div class="row"><span style="display:flex;align-items:center;gap:10px"><span style="display:inline-grid;place-items:center;width:34px;height:34px;border-radius:10px;${categoryStyle(c.name,c.type)}">${customCategoryIcon(c.name,c.type,'🏷️')}</span><span>${esc(categoryLabel(c.name,c.type))} <small class="badge">${typeLabels[c.type]}</small></span></span><span><button class="link-button" onclick="editCategory(${i})">Editar</button> <button class="link-button" onclick="deleteCategoryAt(${i})">Eliminar</button></span></div>`).join('');
+}
+function resetCategoryEditor(){categoryEditing=null;$('newCategory').value='';$('newCategoryType').disabled=false;$('newCategoryType').value='expense';$('categoryIcon').value='🏷️';$('categoryColor').value='#bf0008';$('categoryFormTitle').textContent='Nueva categoría';}
+function editCategory(i){const c=db.categories[i];if(!c)return;categoryEditing=c;$('newCategory').value=c.name;$('newCategoryType').value=c.type;$('newCategoryType').disabled=true;$('categoryIcon').value=categoryIcons.includes(c.icon)?c.icon:'🏷️';$('categoryColor').value=/^#[0-9a-f]{6}$/i.test(c.color||'')?c.color:'#bf0008';$('categoryFormTitle').textContent='Editar categoría';$('newCategory').focus();}
+function addCategory(){const name=$('newCategory').value.trim(),type=$('newCategoryType').value;if(!name)return toast('Escribe un nombre');if(db.categories.some(c=>c!==categoryEditing&&c.type===type&&normalizeCategory(c.name)===normalizeCategory(name)))return toast('La categoría ya existe');const icon=$('categoryIcon').value,color=$('categoryColor').value;if(categoryEditing&&db.categories.includes(categoryEditing)){const old=categoryEditing.name;db.transactions.forEach(t=>{if(t.type===type&&t.category===old)t.category=name});if(type==='expense')db.fixedExpenses.forEach(f=>{if(f.category===old)f.category=name});Object.assign(categoryEditing,{name,icon,color});}else db.categories.push({name,type,icon,color});resetCategoryEditor();save();toast('Categoría guardada');}
+function deleteCategoryAt(i){const c=db.categories[i];if(!c)return;if(db.transactions.some(t=>t.category===c.name&&t.type===c.type)||(c.type==='expense'&&db.fixedExpenses.some(f=>f.category===c.name)))return alert('Esta categoría está en uso. Puedes editarla sin perder registros.');if(confirm('¿Eliminar la categoría?')){db.categories.splice(i,1);resetCategoryEditor();save();}}
 function exportData(){const blob=new Blob([JSON.stringify({app:'minhas-financas',version:1,exportedAt:new Date().toISOString(),data:db},null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='minhas-financas-backup-'+today()+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
 async function importData(e){const file=e.target.files[0];if(!file)return;try{let parsed=JSON.parse(await file.text());if(parsed.app!=='minhas-financas'||!Array.isArray(parsed.data?.accounts)||!Array.isArray(parsed.data?.transactions)||!Array.isArray(parsed.data?.categories))throw Error('Formato inválido');if(!confirm('¿Reemplazar todos los datos actuales por los de la copia de seguridad?'))return;db=parsed.data;if(!Array.isArray(db.weeklyBudgets))db.weeklyBudgets=[];if(!Array.isArray(db.fixedExpenses))db.fixedExpenses=[];save();toast('Copia de seguridad restaurada')}catch(err){alert('No se pudo restaurar: '+err.message)}finally{e.target.value=''}}
 
