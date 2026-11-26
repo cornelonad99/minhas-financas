@@ -550,7 +550,7 @@ dialog::backdrop { background: rgba(18,10,29,.58) }
 .weekly-expense { font-size: 13px; padding-top: 8px; margin-top: 8px; border-top: 1px solid var(--line) }
 .weekly-expense .btn { display: block; margin: 3px 0 0 auto }
 #toast { display: none; position: fixed; z-index: 6; bottom: calc(var(--nav-height) + env(safe-area-inset-bottom) + 13px); left: 50%; transform: translateX(-50%); width: max-content; max-width: calc(100% - 24px); padding: 10px 14px; border-radius: 100px; background: var(--ink); color: var(--surface); font-size: 13px }
-#modal:is([data-kind="income"],[data-kind="expense"]) {
+#modal:is([data-kind="income"],[data-kind="expense"],[data-kind="pending"]) {
   --entry-hero: #f34235;
   --entry-accent: #c2352a;
   --entry-cancel: #ffbcb4;
@@ -582,7 +582,7 @@ dialog::backdrop { background: rgba(18,10,29,.58) }
   --entry-cancel: #b5efb7;
   --entry-category: #8d39be;
 }
-html[data-theme="dark"] #modal:is([data-kind="income"],[data-kind="expense"]) {
+html[data-theme="dark"] #modal:is([data-kind="income"],[data-kind="expense"],[data-kind="pending"]) {
   --entry-surface: var(--surface);
   --entry-ink: var(--ink);
   --entry-muted: var(--muted);
@@ -591,21 +591,21 @@ html[data-theme="dark"] #modal:is([data-kind="income"],[data-kind="expense"]) {
   --entry-category: #ff9ab1;
 }
 html[data-theme="dark"] #modal[data-kind="income"] { --entry-category: #d5a2fc }
-#modal:is([data-kind="income"],[data-kind="expense"]) > .dialog-header { display: none }
-#modal:is([data-kind="income"],[data-kind="expense"]) #form {
+#modal:is([data-kind="income"],[data-kind="expense"],[data-kind="pending"]) > .dialog-header { display: none }
+#modal:is([data-kind="income"],[data-kind="expense"],[data-kind="pending"]) #form {
   display: flex;
   flex-direction: column;
   min-height: 100%;
   padding: 0;
 }
-#modal:is([data-kind="income"],[data-kind="expense"]) #formFields { flex: 1 0 auto }
-#modal:is([data-kind="income"],[data-kind="expense"]) #form > .actions {
+#modal:is([data-kind="income"],[data-kind="expense"],[data-kind="pending"]) #formFields { flex: 1 0 auto }
+#modal:is([data-kind="income"],[data-kind="expense"],[data-kind="pending"]) #form > .actions {
   justify-content: center;
   margin: 0;
   padding: 4cqw 6.82cqw max(7.4dvh, calc(env(safe-area-inset-bottom) + 3cqw));
 }
-#modal:is([data-kind="income"],[data-kind="expense"]) #form > .actions > :not([type="submit"]) { display: none !important }
-#modal:is([data-kind="income"],[data-kind="expense"]) #form > .actions > [type="submit"] {
+#modal:is([data-kind="income"],[data-kind="expense"],[data-kind="pending"]) #form > .actions > :not([type="submit"]) { display: none !important }
+#modal:is([data-kind="income"],[data-kind="expense"],[data-kind="pending"]) #form > .actions > [type="submit"] {
   flex: 1 1 100%;
   min-height: max(40px, 9.09cqw);
   font-size: 3.64cqw;
@@ -815,7 +815,7 @@ html[data-theme="dark"] #modal[data-kind="income"] { --entry-category: #d5a2fc }
 .entry-details .actions { margin-bottom: 12px }
 .entry-capsule > span:first-child { display: grid; place-items: center; flex: none }
 .entry-capsule > span:first-child svg { width: 3.65cqw; height: 3.65cqw; color: var(--entry-choice) }
-#modal:is([data-kind="income"],[data-kind="expense"]) { overflow: auto }
+#modal:is([data-kind="income"],[data-kind="expense"],[data-kind="pending"]) { overflow: auto }
 .closing-body > section + section { margin-top: 12px }
 .closing-dates { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px }
 .closing-dates input { min-width: 0; max-width: 100% }
@@ -1506,6 +1506,9 @@ html[data-section="presupuesto"] main { padding-bottom: calc(var(--nav-height) +
 .account-round-icon .bank-icon[data-bank] { width: 100%; height: 100%; object-fit: cover; border-radius: 0; }
 .chart-list-icon:has(.bank-icon[data-bank]) { background: transparent; overflow: hidden; }
 .chart-list-icon .bank-icon[data-bank] { width: 100%; height: 100%; border-radius: 50%; }
+
+#modal[data-kind="pending"] { --entry-hero:#f28b24; --entry-accent:#c66a12; --entry-cancel:#ffe0bd; --entry-category:#d97706; }
+.quick-actions {grid-template-columns:repeat(4,1fr)} .quick-actions .quick-pending span {color:#e88721} #pendingList {padding:18px;width:min(94vw,460px);max-height:85dvh;overflow:auto} #pendingList button {margin-top:8px} 
 </style></head><body>
 
 <main>
@@ -1773,10 +1776,11 @@ html[data-section="presupuesto"] main { padding-bottom: calc(var(--nav-height) +
     <button type="button" class="quick-transfer" onclick="quickAction('transfer')"><span aria-hidden="true">⇄</span>Transferencia</button>
     <button type="button" class="quick-income" onclick="quickAction('income')"><span aria-hidden="true">↑</span>Ingreso</button>
     <button type="button" class="quick-expense" onclick="quickAction('expense')"><span aria-hidden="true">↓</span>Gasto</button>
+    <button type="button" class="quick-pending" onclick="quickAction('pending')"><span aria-hidden="true">−</span>Pendientes</button>
   </div>
   <button type="button" class="quick-close" aria-label="Cerrar" onclick="$('quickMenu').close()">×</button>
 </dialog>
-<div id="toast" role="status"></div>
+<dialog id="pendingList"><h2>Pendientes</h2><div id="pendingRows"></div><button class="btn" onclick="$('pendingList').close();openTransaction(undefined,'pending')">Nuevo pendiente</button><button class="btn secondary" onclick="$('pendingList').close()">Cerrar</button></dialog><div id="toast" role="status"></div>
 <dialog id="modal" aria-labelledby="modalTitle"><header class="dialog-header"><h2 id="modalTitle"></h2></header><form id="form" onsubmit="saveForm(event)"><div id="formFields"></div><div class="actions"><button type="submit" class="btn">Guardar</button><button type="button" class="btn secondary" onclick="$('modal').close()">Cancelar</button><button type="button" class="btn danger hidden" id="deleteBtn" onclick="deleteCurrent()">Eliminar</button></div></form></dialog>
 <dialog id="weeklyDialog" class="weekly-dialog" aria-labelledby="weeklyDialogTitle"><form id="weeklyForm"><h2 id="weeklyDialogTitle">Nuevo límite semanal</h2><div id="weeklyFields"></div><div class="actions"><button type="button" class="btn secondary" onclick="document.getElementById('weeklyDialog').close()">Cancelar</button><button type="submit" class="btn">Guardar</button></div></form></dialog>
 <script>
@@ -1832,7 +1836,7 @@ function bankPreview(){const b=$('fBank')?.value||'';$('bankPreview').innerHTML=
 
 const monthFormat = new Intl.DateTimeFormat('es-PY',{month:'long',year:'numeric'});
 const overviewMonthFormat = new Intl.DateTimeFormat('es-PY',{month:'long'});
-const typeLabels = {income:'Ingreso',expense:'Gasto',transfer:'Transferencia'};
+const typeLabels = {income:'Ingreso',expense:'Gasto',transfer:'Transferencia',pending:'Pendientes'};
 const monthInput = $('month');
 monthInput.value = monthNow();
 monthInput.onchange = render;
@@ -2814,9 +2818,11 @@ function toggleTransactionOptions() {
  if(!hidden)playMotion($('transactionOptions'),[{opacity:0,transform:'translateY(-5px)'},{opacity:1,transform:'translateY(0)'}],
   {duration:155,easing:'ease-out'});
 }
+function openPendingList(){const rows=db.receivables||[];const totals=currencies.map(c=>[c,rows.filter(t=>!t.realized&&(t.currency||account(t.accountId)?.currency)===c).reduce((n,t)=>n+Number(t.amount),0)]);$('pendingRows').innerHTML='<p>Total por recibir</p>'+totals.map(([c,n])=>`<p><strong>${esc(overviewAmount(n,c))}</strong></p>`).join('')+rows.map(t=>`<button class="btn secondary" data-pending-id="${esc(t.id)}">${esc(t.description||categoryLabel(t.category,'expense'))} · ${esc(overviewAmount(t.amount,t.currency||account(t.accountId)?.currency||'PYG'))} · ${t.realized?'Recibido':'Pendiente'} · ${esc(t.date)}</button>`).join('');$('pendingRows').querySelectorAll('[data-pending-id]').forEach(b=>b.onclick=()=>{$('pendingList').close();openTransaction(b.dataset.pendingId,'pending')});$('pendingList').showModal()}
 function quickAction(type) {
  $('quickMenu').close();
- if (type==='transfer') openTransfer();
+ if (type==='pending') openTransaction(undefined,'pending');
+ else if (type==='transfer') openTransfer();
  else openTransaction(undefined,type);
 }
 const opt=(items,selected)=>items.map(([v,l])=>`<option value="${esc(v)}" ${v===selected?'selected':''}>${esc(l)}</option>`).join('');const field=(label,id,type='text',value='',extra='')=>`<label for="${id}">${label}</label><input id="${id}" type="${type}" value="${esc(value)}" ${extra}>`;const select=(label,id,items,value)=>`<label for="${id}">${label}</label><select id="${id}">${opt(items,value)}</select>`;
@@ -2850,7 +2856,7 @@ let entryDraft;
 
 function openTransaction(id,defaultType='expense',defaultAccountId) {
  if(!db.accounts.length){toast('Primero registra una cuenta');show('contas');return}
- const t = db.transactions.find(x=>x.id===id)||{};
+ const t = (defaultType==='pending'?(db.receivables||[]):db.transactions).find(x=>x.id===id)||{};
  const activeAccount = account(t.accountId)||account(defaultAccountId)||
   db.accounts.find(a=>a.currency===selectedCurrency())||db.accounts[0];
  const enabledCurrencies = currencies.filter(code=>db.accounts.some(a=>a.currency===code));
@@ -2863,7 +2869,7 @@ function openTransaction(id,defaultType='expense',defaultAccountId) {
     <button class="entry-cancel" type="button" onclick="$('modal').close()">Cancelar</button>
     <div class="entry-dropdown entry-type">
      <span id="entryTypeText"></span>${entryIcon('down')}
-     <select id="fType" aria-label="Tipo de movimiento">${opt([['expense','Gasto'],['income','Ingreso']],t.type||defaultType)}</select>
+     <select id="fType" aria-label="Tipo de movimiento">${opt(defaultType==='pending'?[['pending','Pendientes']]:[['expense','Gasto'],['income','Ingreso']],t.type||defaultType)}</select>
     </div>
    </div>
    <label id="entryValueLabel" class="entry-value-label" for="fAmount"></label>
@@ -2878,10 +2884,10 @@ function openTransaction(id,defaultType='expense',defaultAccountId) {
     </div>
    </div>
   </div>
-  <div class="entry-sheet">
+  <div class="entry-sheet">${defaultType==='pending'?'<button type="button" class="btn secondary" onclick="$(\'modal\').close();openPendingList()">Ver pendientes registrados</button>':''}
    <label class="entry-row">
-    ${entryIcon('check')}<span>Realizado</span>
-    <span class="entry-toggle"><input id="fRealized" type="checkbox" role="switch" ${t.realized===false?'':'checked'}><span aria-hidden="true"></span></span>
+    ${entryIcon('check')}<span>${defaultType==='pending'?'Recibido':'Realizado'}</span>
+    <span class="entry-toggle"><input id="fRealized" type="checkbox" role="switch" ${defaultType==='pending'?(t.realized===true?'checked':''):(t.realized===false?'':'checked')}><span aria-hidden="true"></span></span>
    </label>
    <div class="entry-row">
     ${entryIcon('date')}
@@ -2947,7 +2953,7 @@ function updateTransactionAppearance() {
  const type = $('fType').value;
  $('modal').dataset.kind = type;
  $('entryTypeText').textContent = typeLabels[type];
- $('entryValueLabel').textContent = type==='income'?'Valor de los ingresos':'Valor del gasto';
+ $('entryValueLabel').textContent = type==='pending'?'Valor pendiente':type==='income'?'Valor de los ingresos':'Valor del gasto';
 }
 function updateEntryAmount() {
  const currency = $('fCurrency').value;
@@ -2966,14 +2972,14 @@ function updateEntryAccountLabel() {
  $('entryAccountText').textContent = a?.name||'Seleccionar cuenta';
 }
 function renderCategory(current) {
- const type = $('fType').value;
+ const type = $('fType').value==='pending'?'expense':$('fType').value;
  const categories = db.categories.filter(item=>item.type===type).map(item=>[item.name,categoryLabel(item.name,item.type)]);
  if(current&&!categories.some(([name])=>name===current)) categories.push([current,categoryLabel(current,type)]);
  $('fCategory').innerHTML = opt(categories.length?categories:[['','Sin categoría']],current||categories[0]?.[0]);
  updateEntryCategoryLabel();
 }
 function updateEntryCategoryLabel() {
- const type = $('fType').value;
+ const type = $('fType').value==='pending'?'expense':$('fType').value;
  $('entryCategoryIcon').innerHTML = customCategoryIcon($('fCategory').value,type,entryIcon(type==='income'?'categoryIncome':'categoryExpense'));
  $('entryCategoryText').textContent = categoryLabel($('fCategory').value,type)||'Sin categoría';
 }
@@ -3058,15 +3064,16 @@ function saveEntry() {
  const date=$('fDate').value;
  const type=$('fType').value;
  if(!Number.isFinite(amount)||amount<=0){alert('Ingresa un importe válido.');return}
- if(!date||!account(accountId)||!['income','expense'].includes(type))return;
- const original=db.transactions.find(t=>t.id===editing);
+ if(!date||!account(accountId)||!['income','expense','pending'].includes(type))return;
+ const records=type==='pending'?(db.receivables||[]):db.transactions;
+ const original=records.find(t=>t.id===editing);
  const transaction={
-  ...original, id:editing||uid(), type, accountId, amount, date,
+  ...original, id:editing||uid(), type, accountId, amount, date, ...(type==='pending'?{currency:account(accountId).currency}:{}),
   category:$('fCategory').value, description:$('fDescription').value.trim(),
   created:original?.created||new Date().toISOString()
  };
  const fields={
-  realized:$('fRealized').checked?undefined:false,
+  realized:type==='pending'?$('fRealized').checked:($('fRealized').checked?undefined:false),
   favorite:entryDraft.favorite||undefined,
   attachment:entryDraft.attachment||undefined,
   notes:$('fNotes').value.trim()||undefined
@@ -3075,8 +3082,8 @@ function saveEntry() {
   if(value===undefined)delete transaction[key];
   else transaction[key]=value;
  }
- const transactions=original?db.transactions.map(t=>t.id===editing?transaction:t):[...db.transactions,transaction];
- const next={...db,transactions};
+ const recordsNext=original?records.map(t=>t.id===editing?transaction:t):[...records,transaction];
+ const next={...db,[type==='pending'?'receivables':'transactions']:recordsNext};
  try {
   localStorage.setItem(KEY,JSON.stringify(next));
  } catch {
@@ -3120,7 +3127,7 @@ function saveForm(e){
  save();
  toast('Guardado correctamente');
 }
-function deleteCurrent(){if(!editing||!confirm('¿Eliminar este registro?'))return;if(mode==='account'){if(db.transactions.some(t=>t.accountId===editing||t.toAccountId===editing))return alert('Primero elimina los movimientos de esta cuenta.');db.accounts=db.accounts.filter(a=>a.id!==editing)}else db.transactions=db.transactions.filter(t=>t.id!==editing);$('modal').close();save();toast('Registro eliminado')}
+function deleteCurrent(){if($('modal').dataset.kind==='pending'){if(editing&&confirm('¿Eliminar este pendiente?')){db.receivables=(db.receivables||[]).filter(t=>t.id!==editing);$('modal').close();save();openPendingList()}return;}if(!editing||!confirm('¿Eliminar este registro?'))return;if(mode==='account'){if(db.transactions.some(t=>t.accountId===editing||t.toAccountId===editing))return alert('Primero elimina los movimientos de esta cuenta.');db.accounts=db.accounts.filter(a=>a.id!==editing)}else db.transactions=db.transactions.filter(t=>t.id!==editing);$('modal').close();save();toast('Registro eliminado')}
 var categoryEditing=null;
 function categoryRecord(name,type){return db.categories.find(c=>c.name===name&&c.type===type)}
 function customCategoryIcon(name,type,fallback){const c=categoryRecord(name,type);return c&&typeof c.icon==='string'&&c.icon.trim()?esc(c.icon):fallback;}
@@ -3131,8 +3138,8 @@ function renderCategorySettings(){
 }
 function resetCategoryEditor(){categoryEditing=null;$('newCategory').value='';$('newCategoryType').disabled=false;$('newCategoryType').value='expense';$('categoryIcon').value='🏷️';$('categoryColor').value='#bf0008';$('categoryFormTitle').textContent='Nueva categoría';}
 function editCategory(i){const c=db.categories[i];if(!c)return;categoryEditing=c;$('newCategory').value=c.name;$('newCategoryType').value=c.type;$('newCategoryType').disabled=true;$('categoryIcon').value=c.icon||'🏷️';$('categoryColor').value=/^#[0-9a-f]{6}$/i.test(c.color||'')?c.color:'#bf0008';$('categoryFormTitle').textContent='Editar categoría';$('newCategory').focus();}
-function addCategory(){const name=$('newCategory').value.trim(),type=$('newCategoryType').value;if(!name)return toast('Escribe un nombre');if(db.categories.some(c=>c!==categoryEditing&&c.type===type&&normalizeCategory(c.name)===normalizeCategory(name)))return toast('La categoría ya existe');const rawIcon=$('categoryIcon').value.trim();const icon=rawIcon?(typeof Intl.Segmenter==='function'?[...new Intl.Segmenter(undefined,{granularity:'grapheme'}).segment(rawIcon)][0].segment:rawIcon):'🏷️',color=$('categoryColor').value;if(categoryEditing&&db.categories.includes(categoryEditing)){const old=categoryEditing.name;db.transactions.forEach(t=>{if(t.type===type&&t.category===old)t.category=name});if(type==='expense')db.fixedExpenses.forEach(f=>{if(f.category===old)f.category=name});Object.assign(categoryEditing,{name,icon,color});}else db.categories.push({name,type,icon,color});resetCategoryEditor();save();toast('Categoría guardada');}
-function deleteCategoryAt(i){const c=db.categories[i];if(!c)return;if(db.transactions.some(t=>t.category===c.name&&t.type===c.type)||(c.type==='expense'&&db.fixedExpenses.some(f=>f.category===c.name)))return alert('Esta categoría está en uso. Puedes editarla sin perder registros.');if(confirm('¿Eliminar la categoría?')){db.categories.splice(i,1);resetCategoryEditor();save();}}
+function addCategory(){const name=$('newCategory').value.trim(),type=$('newCategoryType').value;if(!name)return toast('Escribe un nombre');if(db.categories.some(c=>c!==categoryEditing&&c.type===type&&normalizeCategory(c.name)===normalizeCategory(name)))return toast('La categoría ya existe');const rawIcon=$('categoryIcon').value.trim();const icon=rawIcon?(typeof Intl.Segmenter==='function'?[...new Intl.Segmenter(undefined,{granularity:'grapheme'}).segment(rawIcon)][0].segment:rawIcon):'🏷️',color=$('categoryColor').value;if(categoryEditing&&db.categories.includes(categoryEditing)){const old=categoryEditing.name;db.transactions.forEach(t=>{if(t.type===type&&t.category===old)t.category=name});if(type==='expense')(db.receivables||[]).forEach(t=>{if(t.category===old)t.category=name});if(type==='expense')db.fixedExpenses.forEach(f=>{if(f.category===old)f.category=name});Object.assign(categoryEditing,{name,icon,color});}else db.categories.push({name,type,icon,color});resetCategoryEditor();save();toast('Categoría guardada');}
+function deleteCategoryAt(i){const c=db.categories[i];if(!c)return;if((c.type==='expense'&&(db.receivables||[]).some(t=>t.category===c.name))||db.transactions.some(t=>t.category===c.name&&t.type===c.type)||(c.type==='expense'&&db.fixedExpenses.some(f=>f.category===c.name)))return alert('Esta categoría está en uso. Puedes editarla sin perder registros.');if(confirm('¿Eliminar la categoría?')){db.categories.splice(i,1);resetCategoryEditor();save();}}
 function exportData(){const blob=new Blob([JSON.stringify({app:'minhas-financas',version:1,exportedAt:new Date().toISOString(),data:db},null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='minhas-financas-backup-'+today()+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
 async function importData(e){const file=e.target.files[0];if(!file)return;try{let parsed=JSON.parse(await file.text());if(parsed.app!=='minhas-financas'||!Array.isArray(parsed.data?.accounts)||!Array.isArray(parsed.data?.transactions)||!Array.isArray(parsed.data?.categories))throw Error('Formato inválido');if(!confirm('¿Reemplazar todos los datos actuales por los de la copia de seguridad?'))return;db=parsed.data;if(!Array.isArray(db.weeklyBudgets))db.weeklyBudgets=[];if(!Array.isArray(db.fixedExpenses))db.fixedExpenses=[];save();toast('Copia de seguridad restaurada')}catch(err){alert('No se pudo restaurar: '+err.message)}finally{e.target.value=''}}
 
