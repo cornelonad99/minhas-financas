@@ -1493,6 +1493,9 @@ html[data-section="presupuesto"] main { padding-bottom: calc(var(--nav-height) +
 .fixed-row p { margin: 1.5cqw 0; font-size: 2.8cqw; color: var(--tx-muted) }
 .fixed-row .actions { grid-column: 1 / -1; margin-top: 1cqw }
 .fixed-amount { text-align: right }
+#presupuesto .tx-movement-value .red { color: var(--tx-negative, #dc2626) }
+.fixed-list-status { display:block; text-align:right; color:var(--tx-muted); font-size:max(9px,2.7cqw); margin-top:-2cqw; }
+.fixed-list-actions { display:flex; justify-content:flex-end; gap: 12px; margin-bottom:2cqw; }
 #budgetSummary { gap: 2cqw }
 #budgetSummary .tx-summary-cell { border: 0; padding: 0 }
 
@@ -2323,7 +2326,7 @@ function detailMovementRow(t) {
  const realized=isRealized(t);
  const date=isClosingDate(t.date)?t.date.slice(-2)+' • '+detailWeekday.format(new Date(t.date)).replace(/\.$/,''):t.date;
  return `<article class="detail-transaction">
-  <span class="detail-status" title="${realized?'Realizado':'Pendiente'}"><span class="sr-only">${realized?'Realizado':'Pendiente'}</span>${entryIcon(realized?'statusCheck':'statusClock')}</span>
+  <span class="detail-status" title="${esc(status)}"><span class="sr-only">${esc(status)}</span>${entryIcon(realized?'statusCheck':'statusClock')}</span>
   <button class="detail-transaction-main" type="button" onclick="${edit}(${id})">
    <span class="detail-subtext">${esc(a?.name||'Cuenta eliminada')}</span>
    <span class="detail-name">${esc(title)}</span>
@@ -2691,7 +2694,7 @@ function renderTransactionSummary(month,view,currency,monthly) {
  ).join('');
 }
 
-function renderTransactionMovement(t) {
+function renderTransactionMovement(t, fixedOptions=null) {
  const a=account(t.accountId);
  const category=categoryLabel(t.category,t.type)||'';
  const type=t.type==='income'||t.type==='expense'?t.type:'transfer';
@@ -2706,13 +2709,15 @@ function renderTransactionMovement(t) {
  const realized=isRealized(t);
  const id=esc(JSON.stringify(String(t.id)));
  const edit=type==='transfer'?'openTransfer':'openTransaction';
+ const action=fixedOptions?.action||`${edit}(${id})`;
+ const status=fixedOptions?.status||(realized?'Realizado':'Pendiente');
 
- return `<button type="button" class="tx-movement" onclick="${edit}(${id})">
+ return `<button type="button" class="tx-movement" onclick="${action}">
   <span class="tx-category-icon ${type}" style="${categoryStyle(t.category,type)}">${customCategoryIcon(t.category,type,entryIcon(categoryIcon))}</span>
   <span class="tx-movement-description"><strong>${esc(title)}${t.favorite?' <span aria-label="Favorito">♥</span>':''}</strong><small>${esc(description)}</small></span>
   <span class="tx-movement-value"><strong class="${tone}">${overviewAmount(t.amount,a?.currency||destination?.currency||'BRL')}</strong>
-   <span class="tx-movement-status${realized?'':' pending'}" title="${realized?'Realizado':'Pendiente'}">
-    <span class="sr-only">${realized?'Realizado':'Pendiente'}</span>${entryIcon(realized?'statusCheck':'statusClock')}
+   <span class="tx-movement-status${realized?'':' pending'}" title="${esc(status)}">
+    <span class="sr-only">${esc(status)}</span>${entryIcon(realized?'statusCheck':'statusClock')}
    </span>
   </span>
  </button>`;
@@ -3419,23 +3424,45 @@ function renderBudget(){
  const fixed=budgetView==='fixed',month=monthInput.value||monthNow();
  $('budgetViewText').textContent=fixed?'Gastos fijos':'Presupuesto semanal';
  $('budgetMonth').textContent=overviewMonthFormat.format(new Date(month+'-01T12:00:00'));
- $('budgetHeading').textContent=fixed?'Vencimientos pendientes':'Límites semanales';$('budgetAdd').textContent=fixed?'+ Gasto fijo':'+ Límite';
+ $('budgetHeading').textContent=fixed?'Gastos fijos del mes':'Límites semanales';$('budgetAdd').textContent=fixed?'+ Gasto fijo':'+ Límite';
  $('weeklyBudgetPane').hidden=fixed;$('fixedBudgetPane').hidden=!fixed;
  let cells;
  if(fixed){const list=fixedVisible(),late=list.filter(f=>f.dueDate<today());cells=[['Pendiente',budgetMoney(list,f=>f.amount,f=>account(f.accountId)?.currency)],['Vencido',budgetMoney(late,f=>f.amount,f=>account(f.accountId)?.currency)]]}
  else{const active=db.weeklyBudgets.filter(weeklyIsActive);cells=[['Límites en curso',String(active.length)],['Disponible',budgetMoney(active,weeklyRemaining,b=>b.currency)]]}
  $('budgetSummary').innerHTML=cells.map(([label,value])=>`<div class="tx-summary-cell"><div><span>${esc(label)}</span><strong>${esc(value)}</strong></div></div>`).join('');
  renderFixedExpenses();
- if(fixed)$('fixedExpenses').insertAdjacentHTML('afterbegin',fixedProjection(month));
+ 
 }
 function renderFixedExpenses(){
- const month=monthInput.value||monthNow(),paid=db.fixedExpenses.filter(f=>f.paidAt&&f.dueDate.slice(0,7)===month),list=[...fixedVisible(),...paid];
- $('fixedExpenses').innerHTML=list.length?list.map(f=>{
-  const a=account(f.accountId),late=!f.paidAt&&f.dueDate<today(),id=weeklyEscId(f.id);
-  return `<article class="fixed-row"><span class="tx-category-icon" aria-hidden="true">${entryIcon(f.paidAt?'statusCheck':'statusClock')}</span><div><h3>${esc(f.name)}</h3><p>${esc(a?.name||'Cuenta eliminada')} · ${esc(categoryLabel(f.category,'expense'))}</p><p>${esc(txHeadingDate.format(new Date(f.dueDate+'T12:00:00Z')))} · ${f.paidAt?'Pagado':late?'Vencido':'Pendiente'} · ${f.repeat==='monthly'?'Mensual':'Una sola vez'}</p></div><div class="fixed-amount">${esc(overviewAmount(f.amount,a?.currency||f.currency||'PYG'))}</div><div class="actions">${!f.paidAt?`<button type="button" class="btn" onclick='payFixedExpense(${id},${weeklyEscId(f.dueDate)})' ${a?'':'disabled'}>Marcar como pagado</button><button type="button" class="btn secondary" onclick='openFixedExpense(${id})'>Editar</button>`:''}<button type="button" class="btn secondary" onclick='deleteFixedExpense(${id})'>Eliminar</button></div></article>`;
- }).join(''):'<div class="empty">No hay gastos fijos pendientes para este mes. Toca + Gasto fijo para crear uno.</div>';
- const paidTransactions=db.transactions.filter(t=>t.fixedExpenseId&&t.date.startsWith(month));
- if(paidTransactions.length)$('fixedExpenses').insertAdjacentHTML('beforeend',`<p class="note">Pagados este mes: ${esc(budgetMoney(paidTransactions,t=>t.amount,t=>account(t.accountId)?.currency))}. Puedes consultar y editar los pagos en Transacciones → Gastos.</p>`);
+ const month=monthInput.value||monthNow(),{start,end}=closingPeriod(month);
+ const rows=[], overdue=[];
+ const paid=db.transactions.filter(t=>t.fixedExpenseId&&isRealized(t));
+ for(const t of paid){const date=t.fixedDueDate||t.date;if(date>=start&&date<=end)rows.push({date,t,paid:true});}
+ for(const f of db.fixedExpenses){
+  if(f.paidAt||!isClosingDate(f.dueDate))continue;
+  let date=f.dueDate;
+  while(date<=end){
+   if(!paid.some(t=>t.fixedExpenseId===f.id&&t.fixedDueDate===date)){
+    const item={date,f,t:{type:'expense',id:f.id,accountId:f.accountId,category:f.category,description:f.name,amount:f.amount,realized:false}};
+    (date<start?overdue:rows).push(item);
+   }
+   if(f.repeat!=='monthly')break;
+   const next=nextFixedDate(date,f.anchorDay||Number(f.dueDate.slice(-2)));if(next<=date)break;date=next;
+  }
+ }
+ function list(items){
+  const groups=new Map();
+  items.sort((a,b)=>b.date.localeCompare(a.date));
+  for(const item of items){if(!groups.has(item.date))groups.set(item.date,[]);groups.get(item.date).push(item);}
+  return [...groups].map(([date,items])=>`<section class="tx-day-group"><h2 class="tx-day">${esc(date===today()?'Hoy':date===yesterdayDate()?'Ayer':txHeadingDate.format(new Date(date)))}</h2>${items.map(({t,f,paid,date})=>{
+   const id=esc(JSON.stringify(String(t.id)));
+   const status=paid?'Pagado':date<today()?'Vencido':'Pendiente';
+   const movement=renderTransactionMovement(t,{action:paid?`openTransaction(${id})`:`openFixedExpense(${id})`,status});
+   const actions=paid?'':`<div class="fixed-list-actions">${date===f.dueDate?`<button type="button" class="link-button" onclick="payFixedExpense(${id},${esc(JSON.stringify(date))})" ${account(f.accountId)?'':'disabled'}>Marcar como pagado</button>`:''}<button type="button" class="link-button" onclick="deleteFixedExpense(${id})">Eliminar</button></div>`;
+   return `<div class="fixed-list-item">${movement}<small class="fixed-list-status">${status}</small>${actions}</div>`;
+  }).join('')}</section>`).join('');
+ }
+ $('fixedExpenses').innerHTML=(rows.length?list(rows):'<div class="empty">No hay gastos fijos en este período.</div>')+(overdue.length?'<h2 class="tx-day">Pendientes anteriores</h2>'+list(overdue):'')+fixedProjection(month);
 }
 function openFixedExpense(id){
  if(!db.accounts.length){alert('Crea una cuenta antes de registrar un gasto fijo.');return}
