@@ -1528,6 +1528,78 @@ html[data-pending-status="true"] body { background-color: #f28b24; }
 #pendingList[open], #modal[open][data-kind="pending"] { top: 0; bottom: auto; margin-block: 0; height: 100dvh; max-height: none; }
 #pendingList .pending-head { padding-top: calc(env(safe-area-inset-top, 0px) + 20px); }
 #modal[data-kind="pending"] .entry-hero { padding-top: max(14.1cqw, calc(env(safe-area-inset-top, 0px) + 20px)); }
+#fixedExpenseDialog {
+  --entry-hero: #f34235;
+  --entry-accent: #c2352a;
+  --entry-cancel: #ffbcb4;
+  --entry-surface: #fefefe;
+  --entry-ink: #080808;
+  --entry-muted: #85858e;
+  --entry-divider: #f0f0f6;
+  --entry-category: #c3221a;
+  --entry-account: #3397c2;
+  box-sizing: border-box;
+  inset: 0;
+  width: min(100%, 620px);
+  max-width: none;
+  height: 100vh;
+  height: 100dvh;
+  max-height: none;
+  margin: auto;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: var(--entry-surface);
+  color: var(--entry-ink);
+  container-type: inline-size;
+  overscroll-behavior: contain;
+}
+#fixedExpenseDialog {
+  --entry-hero: #4bae4f;
+  --entry-accent: #3c8b3f;
+  --entry-cancel: #b5efb7;
+  --entry-category: #8d39be;
+}
+html[data-theme="dark"] #fixedExpenseDialog {
+  --entry-surface: var(--surface);
+  --entry-ink: var(--ink);
+  --entry-muted: var(--muted);
+  --entry-divider: var(--line);
+  --entry-account: #6cc5ed;
+  --entry-category: #ff9ab1;
+}
+html[data-theme="dark"] #fixedExpenseDialog { --entry-category: #d5a2fc }
+#fixedExpenseDialog > .dialog-header { display: none }
+#fixedExpenseDialog #fixedExpenseForm {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  padding: 0;
+}
+#fixedExpenseDialog #fixedExpenseFields { flex: 1 0 auto }
+#fixedExpenseDialog #fixedExpenseForm > .actions {
+  justify-content: center;
+  margin: 0;
+  padding: 4cqw 6.82cqw max(7.4dvh, calc(env(safe-area-inset-bottom) + 3cqw));
+}
+#fixedExpenseDialog #fixedExpenseForm > .actions > :not([type="submit"]) { display: none !important }
+#fixedExpenseDialog #fixedExpenseForm > .actions > [type="submit"] {
+  flex: 1 1 100%;
+  min-height: max(40px, 9.09cqw);
+  font-size: 3.64cqw;
+  font-weight: 400;
+  color: #fff;
+  background: var(--entry-accent);
+  box-shadow: 0 2cqw 3cqw rgba(26,27,35,.10);
+}
+
+#fixedExpenseDialog { --entry-hero:var(--accent); --entry-accent:#4911a6; --entry-cancel:#8c63d8; --entry-category:var(--accent); }
+#fixedExpenseDialog .entry-row select,#fixedExpenseDialog .entry-row input { grid-column:3; min-width:0; width:100%; }
+#fixedExpenseDialog .entry-row .entry-description { grid-column:2 / -1; }
+#fixedExpenseDialog .entry-row select { border:0; background:transparent; color:var(--entry-ink); }
+#fixedExpenseDialog .entry-toolbar .entry-type { display:flex; align-items:center; margin-left:24cqw; }
+#fixedExpenseDialog .entry-amount input { opacity:1; }
+#fixedExpenseDialog .entry-sheet .note { margin:16px 0; }
 </style></head><body>
 
 <main>
@@ -1789,7 +1861,7 @@ html[data-pending-status="true"] body { background-color: #f28b24; }
   <button type="button" onclick="closeTransactionView()">Cancelar</button>
 </dialog>
 <dialog id="budgetViewDialog" aria-label="Seleccionar vista de presupuesto"><button type="button" onclick="closeBudgetView('weekly')">Presupuesto semanal</button><button type="button" onclick="closeBudgetView('fixed')">Gastos fijos</button><button type="button" onclick="closeBudgetView()">Cancelar</button></dialog>
-<dialog id="fixedExpenseDialog" class="weekly-dialog" aria-labelledby="fixedExpenseTitle"><form id="fixedExpenseForm"><h2 id="fixedExpenseTitle">Nuevo gasto fijo</h2><div id="fixedExpenseFields"></div><div class="actions"><button type="button" class="btn secondary" onclick="$('fixedExpenseDialog').close()">Cancelar</button><button type="submit" class="btn">Guardar</button></div></form></dialog>
+<dialog id="fixedExpenseDialog" class="weekly-dialog" aria-labelledby="fixedExpenseTitle"><form id="fixedExpenseForm"><h2 id="fixedExpenseTitle" hidden>Nuevo gasto fijo</h2><div id="fixedExpenseFields"></div><div class="actions"><button type="button" class="btn secondary" onclick="$('fixedExpenseDialog').close()">Cancelar</button><button type="submit" class="btn">Guardar</button></div></form></dialog>
 <dialog id="quickMenu" aria-label="Nuevo movimiento">
   <div class="quick-actions">
     <button type="button" class="quick-transfer" onclick="quickAction('transfer')"><span aria-hidden="true">⇄</span>Transferencia</button>
@@ -2487,6 +2559,12 @@ function closingPeriod(month) {
  return {start,end:end.toISOString().slice(0,10)};
 }
 
+function fixedProjection(month){
+ const {start,end}=closingPeriod(month), rows=new Map();
+ for(const a of db.accounts){if(!rows.has(a.currency))rows.set(a.currency,{balance:0,period:0,prior:0});rows.get(a.currency).balance+=balance(a)}
+ for(const f of db.fixedExpenses){if(f.paidAt||!isClosingDate(f.dueDate))continue;const c=account(f.accountId)?.currency||f.currency;if(!rows.has(c))continue;let date=f.dueDate;while(date<=end){const paid=db.transactions.some(t=>t.fixedExpenseId===f.id&&t.fixedDueDate===date);if(!paid)rows.get(c)[date<start?'prior':'period']+=Number(f.amount)||0;if(f.repeat!=='monthly')break;const next=nextFixedDate(date,f.anchorDay||Number(f.dueDate.slice(-2)));if(next<=date)break;date=next;}}
+ return `<div class="card" style="margin-top:12px"><h2>Proyección de saldo</h2><p class="note">${esc(start)} – ${esc(end)} · Saldo actual menos gastos fijos pendientes hasta el cierre, incluidos atrasos. No incluye ingresos futuros.</p>${[...rows].map(([c,r])=>`<div class="closing-currency"><h3>${esc(c)}</h3><dl class="closing-amounts"><div><dt>Saldo actual</dt><dd>${overviewAmount(r.balance,c)}</dd></div><div><dt>Gastos fijos del período</dt><dd class="red">${overviewAmount(r.period,c)}</dd></div><div><dt>Pendientes anteriores</dt><dd class="red">${overviewAmount(r.prior,c)}</dd></div><div><dt>Saldo proyectado</dt><dd class="${r.balance-r.period-r.prior<0?'red':'green'}">${overviewAmount(r.balance-r.period-r.prior,c)}</dd></div></dl></div>`).join('')}</div>`;
+}
 function renderMonthlyClosing(month,sorted) {
  const form = $('closingForm');
  const {start,end} = closingPeriod(month);
@@ -2515,6 +2593,7 @@ function renderMonthlyClosing(month,sorted) {
   </dl></div>`;
  }).join('');
 
+ $('closingTotals').insertAdjacentHTML('beforeend',fixedProjection(month));
  $('closingCount').textContent=String(transactions.length);
  $('closingRange').textContent=closingDateFormat.format(new Date(start))+' – '+closingDateFormat.format(new Date(end));
  $('closingTransactions').innerHTML=transactions.length?transactions.map(t=>transactionRow(t,true)).join('')
@@ -3347,6 +3426,7 @@ function renderBudget(){
  else{const active=db.weeklyBudgets.filter(weeklyIsActive);cells=[['Límites en curso',String(active.length)],['Disponible',budgetMoney(active,weeklyRemaining,b=>b.currency)]]}
  $('budgetSummary').innerHTML=cells.map(([label,value])=>`<div class="tx-summary-cell"><div><span>${esc(label)}</span><strong>${esc(value)}</strong></div></div>`).join('');
  renderFixedExpenses();
+ if(fixed)$('fixedExpenses').insertAdjacentHTML('afterbegin',fixedProjection(month));
 }
 function renderFixedExpenses(){
  const month=monthInput.value||monthNow(),paid=db.fixedExpenses.filter(f=>f.paidAt&&f.dueDate.slice(0,7)===month),list=[...fixedVisible(),...paid];
@@ -3362,7 +3442,8 @@ function openFixedExpense(id){
  const f=db.fixedExpenses.find(x=>x.id===id);if(f?.paidAt)return;
  const cats=db.categories.filter(c=>c.type==='expense').map(c=>c.name);if(f?.category&&!cats.includes(f.category))cats.push(f.category);if(!cats.length)cats.push('Outras despesas');
  $('fixedExpenseTitle').textContent=f?'Editar gasto fijo':'Nuevo gasto fijo';
- $('fixedExpenseFields').innerHTML=`<input id="fixedId" type="hidden" value="${esc(f?.id||'')}"><label for="fixedName">Nombre</label><input id="fixedName" required maxlength="100" placeholder="Ej.: Alquiler, Internet" value="${esc(f?.name||'')}"><label for="fixedAccount">Cuenta de pago</label><select id="fixedAccount" required>${db.accounts.map(a=>`<option value="${esc(a.id)}" ${a.id===f?.accountId?'selected':''}>${esc(a.name)} · ${esc(a.currency)}</option>`).join('')}</select><label for="fixedAmount">Importe (en la moneda de la cuenta)</label><input id="fixedAmount" type="number" inputmode="decimal" min="0.01" step="0.01" required value="${esc(f?.amount??'')}"><label for="fixedCategory">Categoría</label><select id="fixedCategory">${cats.map(c=>`<option value="${esc(c)}" ${c===f?.category?'selected':''}>${esc(categoryLabel(c,'expense'))}</option>`).join('')}</select><label for="fixedDate">Fecha a pagar</label><input id="fixedDate" type="date" required value="${esc(f?.dueDate||today())}"><label for="fixedRepeat">Repetición</label><select id="fixedRepeat"><option value="monthly" ${f?.repeat!=='once'?'selected':''}>Cada mes</option><option value="once" ${f?.repeat==='once'?'selected':''}>Una sola vez</option></select><p class="note">No se descontará automáticamente. Al confirmar el pago se creará un gasto realizado en la cuenta elegida. Si es mensual, se preparará el siguiente vencimiento.</p>`;
+ $('fixedExpenseFields').innerHTML=`<input id="fixedId" type="hidden" value="${esc(f?.id||'')}"><div class="entry-hero"><div class="entry-toolbar"><button type="button" class="entry-cancel" onclick="$('fixedExpenseDialog').close()">Cancelar</button><span class="entry-type">${f?'Editar gasto fijo':'Gasto fijo'}</span></div><label class="entry-value-label" for="fixedAmount">Importe</label><div class="entry-value-line"><div class="entry-amount"><input id="fixedAmount" type="number" inputmode="decimal" min="0.01" step="0.01" required placeholder="0" value="${esc(f?.amount??'')}"></div><span class="entry-currency" id="fixedCurrency"></span></div></div><div class="entry-sheet"><label class="entry-row">${entryIcon('date')}<span>Fecha a pagar</span><input id="fixedDate" type="date" required value="${esc(f?.dueDate||today())}"></label><label class="entry-row">${entryIcon('pencil')}<input id="fixedName" class="entry-description" required maxlength="100" placeholder="Descripción" value="${esc(f?.name||'')}"></label><label class="entry-row">${entryIcon('category')}<span>Categoría</span><select id="fixedCategory">${cats.map(c=>`<option value="${esc(c)}" ${c===f?.category?'selected':''}>${esc(categoryLabel(c,'expense'))}</option>`).join('')}</select></label><label class="entry-row">${entryIcon('account')}<span>Cuenta de pago</span><select id="fixedAccount" required>${db.accounts.map(a=>`<option value="${esc(a.id)}" ${a.id===f?.accountId?'selected':''}>${esc(a.name)} · ${esc(a.currency)}</option>`).join('')}</select></label><label class="entry-row">${entryIcon('date')}<span>Repetición</span><select id="fixedRepeat"><option value="monthly" ${f?.repeat!=='once'?'selected':''}>Cada mes</option><option value="once" ${f?.repeat==='once'?'selected':''}>Una sola vez</option></select></label><p class="note">El saldo solo se descontará al confirmar el pago.</p></div>`;
+ const updateCurrency=()=>{$('fixedCurrency').textContent=account($('fixedAccount').value)?.currency||''};$('fixedAccount').addEventListener('change',updateCurrency);updateCurrency();
  $('fixedExpenseDialog').showModal();
 }
 function commitFixedData(next){try{localStorage.setItem(KEY,JSON.stringify(next))}catch{alert('No se pudo guardar. Comprueba el espacio de almacenamiento disponible.');return false}db=next;render();return true}
