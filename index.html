@@ -1894,8 +1894,8 @@ applyTheme();
 const pendingColorObserver = new MutationObserver(syncTopColor);
 for (const id of ['pendingList','modal']) pendingColorObserver.observe(document.getElementById(id), {attributes:true,attributeFilter:['open','data-kind']});
 const isRealized = transaction => transaction.type==='transfer'||transaction.realized!==false;
-const KEY='minhas_financas_v1';const defaults={accounts:[],transactions:[],categories:[{name:'Salário',type:'income'},{name:'Atendimentos',type:'income'},{name:'Outras receitas',type:'income'},{name:'Alimentação',type:'expense'},{name:'Transporte',type:'expense'},{name:'Moradia',type:'expense'},{name:'Saúde',type:'expense'},{name:'Lazer',type:'expense'},{name:'Compras',type:'expense'},{name:'Outras despesas',type:'expense'}]};let db;try{db=JSON.parse(localStorage.getItem(KEY))||structuredClone(defaults)}catch{db=structuredClone(defaults)}if(!Array.isArray(db.weeklyBudgets))db.weeklyBudgets=[];if(!Array.isArray(db.fixedExpenses))db.fixedExpenses=[];let mode='',editing=null;const $=id=>document.getElementById(id),uid=()=>crypto.randomUUID?.()||String(Date.now()+Math.random()),today=()=>new Date().toLocaleDateString('en-CA'),monthNow=()=>today().slice(0,7),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),money=(n,c)=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:c,maximumFractionDigits:c==='PYG'?0:2}).format(n||0),save=()=>{try{localStorage.setItem(KEY,JSON.stringify(db))}catch{alert('No se pudo guardar. Comprueba el espacio de almacenamiento disponible.')}render()},toast=s=>{let t=$('toast');t.textContent=s;t.style.display='block';setTimeout(()=>t.style.display='none',2500)},account=id=>db.accounts.find(a=>a.id===id),balance=a=>Number(a.initial||0)+db.transactions.reduce((sum,t)=>{
- if(!isRealized(t))return sum;
+const KEY='minhas_financas_v1';const defaults={accounts:[],transactions:[],categories:[{name:'Salário',type:'income'},{name:'Atendimentos',type:'income'},{name:'Outras receitas',type:'income'},{name:'Alimentação',type:'expense'},{name:'Transporte',type:'expense'},{name:'Moradia',type:'expense'},{name:'Saúde',type:'expense'},{name:'Lazer',type:'expense'},{name:'Compras',type:'expense'},{name:'Outras despesas',type:'expense'}]};let db;try{db=JSON.parse(localStorage.getItem(KEY))||structuredClone(defaults)}catch{db=structuredClone(defaults)}if(!Array.isArray(db.weeklyBudgets))db.weeklyBudgets=[];if(!Array.isArray(db.fixedExpenses))db.fixedExpenses=[];let mode='',editing=null;const $=id=>document.getElementById(id),uid=()=>crypto.randomUUID?.()||String(Date.now()+Math.random()),today=()=>new Date().toLocaleDateString('en-CA'),monthNow=()=>today().slice(0,7),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),money=(n,c)=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:c,maximumFractionDigits:c==='PYG'?0:2}).format(n||0),save=()=>{try{localStorage.setItem(KEY,JSON.stringify(db))}catch{alert('No se pudo guardar. Comprueba el espacio de almacenamiento disponible.')}render()},toast=s=>{let t=$('toast');t.textContent=s;t.style.display='block';setTimeout(()=>t.style.display='none',2500)},account=id=>db.accounts.find(a=>a.id===id),balance=(a,month=monthInput.value||monthNow())=>Number(a.initial||0)+db.transactions.reduce((sum,t)=>{
+ if(!isRealized(t)||t.date>closingPeriod(month).end)return sum;
  const debit=t.accountId===a.id ? (t.type==='income'?+t.amount:t.type==='expense'||t.type==='transfer'?-t.amount:0) : 0;
  const credit=t.toAccountId===a.id&&t.type==='transfer'?+t.amount:0;
  return sum+debit+credit;
@@ -2088,11 +2088,11 @@ function selectedCurrency() {
 }
 function monthlyTotals(month,currency) {
  const accounts = db.accounts.filter(a=>a.currency===currency);
- const transactions = db.transactions.filter(t=>isRealized(t)&&t.date.startsWith(month)&&account(t.accountId)?.currency===currency);
+ const transactions = db.transactions.filter(t=>isRealized(t)&&inPeriod(t.date,month)&&account(t.accountId)?.currency===currency);
  const income = transactions.filter(t=>t.type==='income').reduce((sum,t)=>sum+t.amount,0);
  const expenses = transactions.filter(t=>t.type==='expense');
  return {
-  balance: accounts.reduce((sum,a)=>sum+balance(a),0), income, expenses,
+  balance: accounts.reduce((sum,a)=>sum+balance(a,month),0), income, expenses,
   expense: expenses.reduce((sum,t)=>sum+t.amount,0)
  };
 }
@@ -2106,7 +2106,7 @@ const homeSummaryCards = [
 function renderHomeSummary(month,currency,totals,isTotal) {
  const pending={income:0,expense:0};
  for(const tx of db.transactions){
-  if(isRealized(tx)||!tx.date.startsWith(month)||!Object.hasOwn(pending,tx.type))continue;
+  if(isRealized(tx)||!inPeriod(tx.date,month)||!Object.hasOwn(pending,tx.type))continue;
   const code=account(tx.accountId)?.currency;
   if(!code||(!isTotal&&code!==currency))continue;
   const rate=code===currency?1:guaraniRate(code);
@@ -2216,8 +2216,8 @@ function addFromHomeDetail() {
  openTransaction(undefined,type,detailStatementAccount||undefined);
  if(!$('fDate')||!$('modal').open)return;
  const month=monthInput.value||monthNow();
- if(!today().startsWith(month)){
-  $('fDate').value=month+'-01';
+ if(!inPeriod(today(),month)){
+  $('fDate').value=closingPeriod(month).start;
   updateEntryDate();
  }
 }
@@ -2367,7 +2367,7 @@ function renderHomeDetail(month,sorted,currency,overview,visibleAccounts) {
   const rows=sorted.filter(t=>{
    const from=account(t.accountId);
    const to=account(t.toAccountId);
-   return t.date.startsWith(month)
+   return inPeriod(t.date,month)
     &&(statement||t.type===detailKind)
     &&(!statementAccount||t.accountId===statementAccount.id||t.toAccountId===statementAccount.id)
     &&(allCurrencies||from?.currency===currency||to?.currency===currency)
@@ -2429,7 +2429,7 @@ function chartData(month,type,group,view,accountId='',includePending=false) {
  const days=new Map();
  let partial=false;
  for(const tx of db.transactions){
-  if(tx.type!==type||!tx.date.startsWith(month)||(!includePending&&!isRealized(tx))||(accountId&&tx.accountId!==accountId))continue;
+  if(tx.type!==type||!inPeriod(tx.date,month)||(!includePending&&!isRealized(tx))||(accountId&&tx.accountId!==accountId))continue;
   const a=account(tx.accountId);
   if(!a||(view!=='TOTAL'&&a.currency!==currency))continue;
   const rate=a.currency===currency?1:guaraniRate(a.currency);
@@ -2467,17 +2467,18 @@ function donutChart(data,compact=false) {
 }
 function plotChart(data,month,type) {
  if(!data.total)return '<div class="chart-empty">No hay registros en este período.</div>';
- const count=new Date(Number(month.slice(0,4)),Number(month.slice(5)),0).getDate();
- const values=Array.from({length:count},(_,i)=>data.days.get(month+'-'+String(i+1).padStart(2,'0'))||0);
+ const {start,end}=closingPeriod(month);
+ const dates=[]; for(let d=new Date(start+'T00:00:00Z');d.toISOString().slice(0,10)<=end;d.setUTCDate(d.getUTCDate()+1))dates.push(d.toISOString().slice(0,10));
+ const count=dates.length; const values=dates.map(date=>data.days.get(date)||0);
  const max=Math.max(...values,1);
- const x=i=>35+i*310/(count-1);
+ const x=i=>35+i*310/Math.max(1,count-1);
  const y=value=>185-value/max*155;
  const color='#5419d1';
  const axes=Array.from({length:5},(_,i)=>{
   const value=max*i/4,yy=y(value);
   return `<path class="chart-axis" d="M35 ${yy}H345"/><text x="30" y="${yy+3}" text-anchor="end">${overviewAmountsHidden?'••':esc(new Intl.NumberFormat('es-PY',{notation:'compact',maximumFractionDigits:1}).format(value))}</text>`;
  }).join('');
- const labels=[0,Math.floor((count-1)/2),count-1].map(i=>`<text x="${x(i)}" y="202" text-anchor="middle">${i+1}/${month.slice(5)}</text>`).join('');
+ const labels=[0,Math.floor((count-1)/2),count-1].map(i=>`<text x="${x(i)}" y="202" text-anchor="middle">${dates[i].slice(8)}/${dates[i].slice(5,7)}</text>`).join('');
  const marks=type==='line'?`<polyline points="${values.map((v,i)=>x(i)+','+y(v)).join(' ')}" fill="none" stroke="${color}" stroke-width="2.5"/>${values.map((v,i)=>`<circle cx="${x(i)}" cy="${y(v)}" r="2.5" fill="${color}"/>`).join('')}`:
  values.map((v,i)=>`<rect x="${x(i)-3}" y="${y(v)}" width="6" height="${185-y(v)}" rx="1.5" fill="${color}"/>`).join('');
  return `<svg class="chart-plot" viewBox="0 0 365 220" role="img" aria-label="${type==='line'?'Líneas':'Barras'} de importes diarios">${axes}${marks}${labels}</svg>`;
@@ -2552,21 +2553,25 @@ function isClosingDate(value) {
   &&new Date(value+'T00:00:00Z').toJSON()?.slice(0,10)===value;
 }
 
+function shiftDate(date,days){const d=new Date(date+'T00:00:00Z');d.setUTCDate(d.getUTCDate()+days);return d.toISOString().slice(0,10)}
+function adjacentMonth(month,offset){const d=new Date(month+'-01T00:00:00Z');d.setUTCMonth(d.getUTCMonth()+offset);return d.toISOString().slice(0,7)}
+function inPeriod(date,month){const {start,end}=closingPeriod(month);return date>=start&&date<=end}
+function periodForDate(date){const m=date.slice(0,7);return [m,adjacentMonth(m,-1),adjacentMonth(m,1)].find(x=>inPeriod(date,x))||m}
 function closingPeriod(month) {
  const saved = db.monthlyClosings?.[month];
  if(isClosingDate(saved?.start)&&isClosingDate(saved?.end)&&saved.start<=saved.end)return saved;
 
- const start = month+'-01';
- const end = new Date(start+'T00:00:00Z');
- end.setUTCMonth(end.getUTCMonth()+1,0);
- return {start,end:end.toISOString().slice(0,10)};
+ const prev=db.monthlyClosings?.[adjacentMonth(month,-1)], next=db.monthlyClosings?.[adjacentMonth(month,1)];
+ const start=isClosingDate(prev?.end)?shiftDate(prev.end,1):month+'-01';
+ const end=isClosingDate(next?.start)?shiftDate(next.start,-1):shiftDate(adjacentMonth(month,1)+'-01',-1);
+ return {start,end};
 }
 
 function fixedProjection(month){
  const {start,end}=closingPeriod(month), rows=new Map();
- for(const a of db.accounts){if(!rows.has(a.currency))rows.set(a.currency,{balance:0,period:0,prior:0});rows.get(a.currency).balance+=balance(a)}
+ for(const a of db.accounts){if(!rows.has(a.currency))rows.set(a.currency,{balance:0,period:0,prior:0});rows.get(a.currency).balance+=balance(a,month)}
  for(const f of db.fixedExpenses){if(f.paidAt||!isClosingDate(f.dueDate))continue;const c=account(f.accountId)?.currency||f.currency;if(!rows.has(c))continue;let date=f.dueDate;while(date<=end){const paid=db.transactions.some(t=>t.fixedExpenseId===f.id&&t.fixedDueDate===date);if(!paid)rows.get(c)[date<start?'prior':'period']+=Number(f.amount)||0;if(f.repeat!=='monthly')break;const next=nextFixedDate(date,f.anchorDay||Number(f.dueDate.slice(-2)));if(next<=date)break;date=next;}}
- return `<div class="card" style="margin-top:12px"><h2>Proyección de saldo</h2><p class="note">${esc(start)} – ${esc(end)} · Saldo actual menos gastos fijos pendientes hasta el cierre, incluidos atrasos. No incluye ingresos futuros.</p>${[...rows].map(([c,r])=>`<div class="closing-currency"><h3>${esc(c)}</h3><dl class="closing-amounts"><div><dt>Saldo actual</dt><dd>${overviewAmount(r.balance,c)}</dd></div><div><dt>Gastos fijos del período</dt><dd class="red">${overviewAmount(r.period,c)}</dd></div><div><dt>Pendientes anteriores</dt><dd class="red">${overviewAmount(r.prior,c)}</dd></div><div><dt>Saldo proyectado</dt><dd class="${r.balance-r.period-r.prior<0?'red':'green'}">${overviewAmount(r.balance-r.period-r.prior,c)}</dd></div></dl></div>`).join('')}</div>`;
+ return `<div class="card" style="margin-top:12px"><h2>Proyección de saldo</h2><p class="note">${esc(start)} – ${esc(end)} · Saldo al cierre del período menos gastos fijos pendientes hasta el cierre, incluidos atrasos. No incluye ingresos futuros.</p>${[...rows].map(([c,r])=>`<div class="closing-currency"><h3>${esc(c)}</h3><dl class="closing-amounts"><div><dt>Saldo al cierre</dt><dd>${overviewAmount(r.balance,c)}</dd></div><div><dt>Gastos fijos del período</dt><dd class="red">${overviewAmount(r.period,c)}</dd></div><div><dt>Pendientes anteriores</dt><dd class="red">${overviewAmount(r.prior,c)}</dd></div><div><dt>Saldo proyectado</dt><dd class="${r.balance-r.period-r.prior<0?'red':'green'}">${overviewAmount(r.balance-r.period-r.prior,c)}</dd></div></dl></div>`).join('')}</div>`;
 }
 function renderMonthlyClosing(month,sorted) {
  const form = $('closingForm');
@@ -2615,6 +2620,9 @@ function saveMonthlyClosing(event) {
   return;
  }
 
+ for(const [key,p] of Object.entries(db.monthlyClosings||{})){
+  if(key!==month&&isClosingDate(p.start)&&isClosingDate(p.end)&&start<=p.end&&end>=p.start){status.textContent='Las fechas se superponen con '+key+'. Ajusta ese período antes de guardar.';return;}
+ }
  const next={...db,monthlyClosings:{...db.monthlyClosings,[month]:{start,end}}};
  try {
   localStorage.setItem(KEY,JSON.stringify(next));
@@ -2677,7 +2685,7 @@ function renderTransactionSummary(month,view,currency,monthly) {
  let cells;
  if(view==='expense'||view==='income'){
   const pending = db.transactions.reduce((sum,t)=>sum+(
-   t.type===view&&!isRealized(t)&&t.date.startsWith(month)&&account(t.accountId)?.currency===currency?Number(t.amount):0
+   t.type===view&&!isRealized(t)&&inPeriod(t.date,month)&&account(t.accountId)?.currency===currency?Number(t.amount):0
   ),0);
   const tone=view==='expense'?'red':'green';
   cells=[['Total pendiente',pending,tone],[
@@ -2742,7 +2750,7 @@ function renderTransactionRows(rows,view) {
  const yesterday=yesterdayDate();
  return Array.from(groups,([date,items])=>{
   const day=date===now?'Hoy':date===yesterday?'Ayer':
-   isClosingDate(date)?txHeadingDate.format(new Date(date)):date;
+   isClosingDate(date)?txHeadingDate.format(new Date(date+'T12:00:00')):date;
   return `<section class="tx-day-group"><h2 class="tx-day">${esc(day)}</h2>${items.map(renderTransactionMovement).join('')}</section>`;
  }).join('');
 }
@@ -2803,7 +2811,7 @@ function renderTransactionPane(month,selectedMonth,sorted,currency,totals,overvi
   list.innerHTML=renderTxAccounts(accounts);
  }else{
   const allPeriods=$('allPeriods').checked;
-  const rows=sorted.filter(t=>(allPeriods||t.date.startsWith(month))
+  const rows=sorted.filter(t=>(allPeriods||inPeriod(t.date,month))
    &&(!currencyFilter||account(t.accountId)?.currency===currencyFilter)
    &&(view==='all'||view===t.type));
   list.innerHTML=renderTransactionRows(rows,view);
@@ -2879,7 +2887,7 @@ function render() {
  renderQuoteNote($('homeFxQuote'),allCurrencies);
  $('accountList').innerHTML = db.accounts.length?`<div class="card account-panel">${db.accounts.map(accountRow).join('')}</div>`:'<div class="card empty">No hay cuentas registradas.</div>';
  const sorted = [...db.transactions].sort((a,b)=>b.date.localeCompare(a.date)||b.created.localeCompare(a.created));
- $('recent').innerHTML = sorted.slice(0,5).map(transactionRow).join('')||'<div class="empty">Aún no hay movimientos.</div>';
+ $('recent').innerHTML = sorted.filter(t=>inPeriod(t.date,month)).slice(0,5).map(transactionRow).join('')||'<div class="empty">Aún no hay movimientos.</div>';
  renderExpensePreview(month);
  if($('graficos').classList.contains('active'))renderExpenseCharts(month);
 
@@ -2930,7 +2938,7 @@ let pendingMonth='';
 function shiftPendingMonth(offset){const d=monthDate(pendingMonth);d.setMonth(d.getMonth()+offset);pendingMonth=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');renderPendingList()}
 function openPendingList(reset=true){if(reset||!pendingMonth)pendingMonth=monthInput.value||monthNow();renderPendingList();if(!$('pendingList').open)$('pendingList').showModal()}
 function renderPendingList(){
- const rows=(db.receivables||[]).filter(t=>t.date.startsWith(pendingMonth)).sort((a,b)=>b.date.localeCompare(a.date));
+ const rows=(db.receivables||[]).filter(t=>inPeriod(t.date,pendingMonth)).sort((a,b)=>b.date.localeCompare(a.date));
  $('pendingMonthText').textContent=overviewMonthFormat.format(monthDate(pendingMonth));
  $('pendingSummary').innerHTML=[false,true].map((received,i)=>{const totals=currencies.map(c=>[c,rows.filter(t=>Boolean(t.realized)===received&&(t.currency||account(t.accountId)?.currency)===c).reduce((n,t)=>n+Number(t.amount),0)]).filter(x=>x[1]);return `<div class="tx-summary-cell">${entryIcon(i?'wallet':'summaryLock')}<div><span>${received?'Total recibido':'Total pendiente'}</span><strong class="orange">${(totals.length?totals:[[selectedCurrency(),0]]).map(([c,n])=>esc(overviewAmount(n,c))).join('<br>')}</strong></div></div>`}).join('');
  const groups=new Map();for(const t of rows){if(!groups.has(t.date))groups.set(t.date,[]);groups.get(t.date).push(t)}
@@ -3211,7 +3219,7 @@ function saveEntry() {
  db=next;
  $('modal').close();
  render();
- if(type==='pending'){pendingMonth=date.slice(0,7);openPendingList(false)}
+ if(type==='pending'){pendingMonth=periodForDate(date);openPendingList(false)}
  toast('Guardado correctamente');
 }
 
@@ -3419,7 +3427,7 @@ function budgetMoney(items,amountOf,currencyOf){
  const sums=new Map();for(const x of items){const c=currencyOf(x);if(!currencies.includes(c))continue;sums.set(c,(sums.get(c)||0)+Number(amountOf(x)||0))}
  return sums.size?[...sums].map(([c,n])=>overviewAmount(n,c)).join(' · '):'0 gs';
 }
-function fixedVisible(){const month=monthInput.value||monthNow();return db.fixedExpenses.filter(f=>!f.paidAt&&f.dueDate.slice(0,7)<=month).sort((a,b)=>a.dueDate.localeCompare(b.dueDate))}
+function fixedVisible(){const month=monthInput.value||monthNow();return db.fixedExpenses.filter(f=>!f.paidAt&&inPeriod(f.dueDate,month)).sort((a,b)=>a.dueDate.localeCompare(b.dueDate))}
 function renderBudget(){
  const fixed=budgetView==='fixed',month=monthInput.value||monthNow();
  $('budgetViewText').textContent=fixed?'Gastos fijos':'Presupuesto semanal';
@@ -3454,7 +3462,7 @@ function renderFixedExpenses(){
   const groups=new Map();
   items.sort((a,b)=>b.date.localeCompare(a.date));
   for(const item of items){if(!groups.has(item.date))groups.set(item.date,[]);groups.get(item.date).push(item);}
-  return [...groups].map(([date,items])=>`<section class="tx-day-group"><h2 class="tx-day">${esc(date===today()?'Hoy':date===yesterdayDate()?'Ayer':txHeadingDate.format(new Date(date)))}</h2>${items.map(({t,f,paid,date})=>{
+  return [...groups].map(([date,items])=>`<section class="tx-day-group"><h2 class="tx-day">${esc(date===today()?'Hoy':date===yesterdayDate()?'Ayer':txHeadingDate.format(new Date(date+'T12:00:00')))}</h2>${items.map(({t,f,paid,date})=>{
    const id=esc(JSON.stringify(String(t.id)));
    const status=paid?'Pagado':date<today()?'Vencido':'Pendiente';
    const movement=renderTransactionMovement(t,{action:paid?`openTransaction(${id})`:`openFixedExpense(${id})`,status});
